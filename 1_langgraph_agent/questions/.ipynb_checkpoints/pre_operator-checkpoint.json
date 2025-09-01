@@ -1,0 +1,34 @@
+[
+  {
+    "id": "name",
+    "text": "Hi, I’m Dylana from DealEdge.  To start, could you please share your full name?"
+  },
+  {
+    "id": "pe_experience",
+    "text": "Have you ever operated in a private equity-backed company? Feel free to mention the sponsor name, fund, or deal context if applicable."
+  },
+  {
+    "id": "exits",
+    "text": "Have you been involved in any company exits such as IPOs, acquisitions, or recapitalizations?"
+  },
+  {
+    "id": "company_size",
+    "text": "What size companies have you worked with in terms of revenue size? (e.g., 100mil ~ 200mil)"
+  },
+  {
+    "id": "sector_focus",
+    "text": "Are there particular industries or domains where you’ve spent the majority of your operating career?"
+  },
+  {
+    "id": "functional_expertise",
+    "text": "What areas of the business have you most frequently led — for example, go-to-market, finance, operations, or engineering?"
+  },
+  {
+    "id": "roles_interest",
+    "text": "Looking ahead, what roles are you most interested in exploring next — such as CEO, CFO, Operating Partner, or Board Director?"
+  },
+  {
+    "id": "outro",
+    "text": "That’s all for now — thank you for sharing your background. We’ll follow up with any next steps. Take care!"
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "id": "name",
+    "text": "Hi, I'm Alex from TechCorp. To start, could you please share your full name?"
+  },
+  {
+    "id": "current_role",
+    "text": "What is your current role or position at your company?"
+  },
+  {
+    "id": "company_experience",
+    "text": "Tell me about your experience with technology companies. Have you worked at startups, established companies, or both?"
+  },
+  {
+    "id": "leadership_experience",
+    "text": "What leadership positions have you held, and what size teams have you managed?"
+  },
+  {
+    "id": "industry_focus",
+    "text": "What industries or sectors have you focused on throughout your career?"
+  },
+  {
+    "id": "functional_expertise",
+    "text": "What functional areas do you consider your core expertise - such as sales, marketing, operations, finance, or technology?"
+  },
+  {
+    "id": "achievements",
+    "text": "What accomplishments are you most proud of in your professional career?"
+  },
+  {
+    "id": "challenges",
+    "text": "What was the most significant challenge you faced, and how did you overcome it?"
+  },
+  {
+    "id": "career_goals",
+    "text": "What are your career aspirations for the next 3-5 years?"
+  },
+  {
+    "id": "outro",
+    "text": "Thank you for sharing your background with us. We appreciate your time and will be in touch soon!"
+  }
+]

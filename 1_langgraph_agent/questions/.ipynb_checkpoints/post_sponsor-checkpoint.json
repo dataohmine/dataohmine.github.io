@@ -1,0 +1,10 @@
+[
+  {
+    "id": "feedback",
+    "text": "How did the discussion go from your perspective?"
+  },
+  {
+    "id": "fit",
+    "text": "Do you think the operator would be a fit for this deal?"
+  }
+]

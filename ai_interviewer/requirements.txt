@@ -1,0 +1,11 @@
+streamlit>=1.28.0
+openai>=1.0.0
+pyaudio
+pydub
+webrtcvad
+langgraph
+python-dotenv
+requests
+langchain-core
+langchain-openai
+typing-extensions

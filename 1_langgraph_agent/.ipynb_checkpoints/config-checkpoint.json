@@ -1,0 +1,127 @@
+{
+  "voice_model": "tts-1",
+  "transcription_model": "whisper-1",
+  "summary_model": "gpt-4o-mini",
+  "voice_name": "nova",
+  "silence_seconds": 2.0,
+  "system_prompt": "You are a warm and professional interview assistant. Provide clear, concise summaries that capture the key points and insights from each interview response.",
+  
+  "roles_context": [
+    "CEO - Chief Executive Officer",
+    "CFO - Chief Financial Officer", 
+    "COO - Chief Operating Officer",
+    "CTO - Chief Technology Officer",
+    "President - Company President",
+    "Founder - Company Founder",
+    "Director - Department Director",
+    "VP - Vice President"
+  ],
+  "role_transcription_prompt": "The speaker is stating their executive role or job title. Common executive acronyms that are often mispronounced include: CEO (sounds like 'see-ee-oh'), CFO (sounds like 'see-eff-oh'), COO (sounds like 'see-oh-oh'). Other common titles include President, Founder, Director, Manager, VP (Vice President), CTO, CMO. Please listen carefully for these business titles and acronyms, as they may be spoken quickly or unclear. The response should focus on executive roles and business titles.",
+  "role_transcription_temperature": 0,
+  "role_transcription_language": "en",
+  
+  "exit_context": [
+    "IPO - Initial Public Offering",
+    "Acquired - Company was acquired by another company",
+    "Merger - Companies merged together",
+    "Buyout - Company was bought out",
+    "Sale - Company was sold"
+  ],
+  "exit_transcription_prompt": "The person is describing a business exit event or transaction. Listen for terms like IPO (sounds like 'eye-pee-oh'), acquisition, merger, buyout, sale, private equity, strategic buyer. Common exits include: IPO, acquired by [company name], merger with [company name], bought out, sold to [company name].",
+  "exit_transcription_temperature": 0,
+  "exit_transcription_language": "en",
+  
+  "functional_context": [
+    "Sales - Revenue generation and customer acquisition",
+    "Marketing - Brand promotion and lead generation",
+    "Operations - Day-to-day business operations",
+    "Finance - Financial management and accounting",
+    "Technology - IT and software development",
+    "Engineering - Product development and technical work"
+  ],
+  "functional_transcription_prompt": "The person is describing their functional business area or department. Common areas include: Sales, Marketing, Operations (often shortened to 'Ops'), Finance, Technology (often shortened to 'Tech'), Engineering, HR (Human Resources), Product Management, Strategy, Business Development (often shortened to 'Biz Dev').",
+  "functional_transcription_temperature": 0,
+  "functional_transcription_language": "en",
+  
+  "default_transcription_prompt": "The speaker is providing a detailed professional response about their business experience and career interests. Please transcribe the complete response accurately, paying attention to business terminology and industry-specific language.",
+  "default_transcription_temperature": 0,
+  "default_transcription_language": "en",
+  
+  "audio_settings": {
+    "recording_timeout": 30,
+    "min_recording_duration": 0.5,
+    "max_recording_duration": 120,
+    "audio_format": "wav",
+    "sample_rate": 16000,
+    "silence_threshold": -50,
+    "silence_duration": 2.0
+  },
+  
+  "validation_settings": {
+    "min_response_length": 1,
+    "min_role_response_length": 1,
+    "min_name_response_length": 2,
+    "max_retries": 2,
+    "retry_messages": {
+      "empty_response": "I didn't catch that. Could you please repeat your answer?",
+      "short_response": "Could you provide a bit more detail?",
+      "unclear_response": "I didn't quite understand. Could you try again?",
+      "role_unclear": "Could you please state your role or job title?",
+      "name_unclear": "Could you please state your name clearly?",
+      "max_retries": "Thank you, let's move on to the next question."
+    }
+  },
+  
+  "executive_role_detection": {
+    "enabled": true,
+    "ceo_variants": [
+      "ceo", "io", "co", "seo", "seeo", "cio", "c e o", "c.e.o", 
+      "see o", "see oh", "c o", "eeo", "eo", "o"
+    ],
+    "cfo_variants": [
+      "cfo", "seafo", "seafoo", "seaphone", "seefo", "c f o", 
+      "c.f.o", "sefo", "fo"
+    ],
+    "coo_variants": [
+      "coo", "ku", "koo", "c o o", "c.o.o"
+    ],
+    "other_executive_terms": [
+      "president", "founder", "director", "manager", "vp", 
+      "vice president", "chief", "owner", "partner", "head", "lead"
+    ]
+  },
+  
+  "interview_flow": {
+    "welcome_message": "Welcome! I'll be conducting your interview today. Please speak clearly and take your time with each response.",
+    "transition_message": "Great, let's continue.",
+    "completion_message": "Thank you for completing the interview. Your responses have been recorded.",
+    "goodbye_message": "Thank you for your time. Have a great day!",
+    "role_confirmation_enabled": true,
+    "role_confirmation_threshold": 3
+  },
+  
+  "file_settings": {
+    "output_directory": "interview_outputs",
+    "audio_format": "mp3",
+    "json_indent": 2,
+    "include_timestamp": true,
+    "compress_audio": true,
+    "save_raw_transcriptions": true
+  },
+  
+  "debug_settings": {
+    "verbose_logging": true,
+    "save_individual_audio_files": false,
+    "print_transcriptions": true,
+    "print_raw_transcriptions": true,
+    "log_api_calls": false,
+    "log_audio_analysis": true
+  },
+  
+  "transcription_enhancements": {
+    "use_context_prompts": true,
+    "aggressive_role_fixing": true,
+    "phonetic_matching_enabled": true,
+    "business_acronym_detection": true
+  }
+}

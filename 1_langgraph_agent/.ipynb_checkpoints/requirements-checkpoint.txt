@@ -1,0 +1,7 @@
+openai
+pyaudio
+pydub
+webrtcvad
+langgraph
+python-dotenv
+requests
