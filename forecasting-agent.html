@@ -248,12 +248,24 @@
 
         // Helper function for browser console configuration
         window.setApiKeys = function(fredKey, timegptKey, openaiKey) {
-            if (fredKey) localStorage.setItem('fred_api_key', fredKey);
-            if (timegptKey) localStorage.setItem('timegpt_api_key', timegptKey);
-            if (openaiKey) localStorage.setItem('openai_api_key', openaiKey);
+            if (fredKey) {
+                const cleanFredKey = fredKey.replace('FRED_API_KEY=', '');
+                localStorage.setItem('fred_api_key', cleanFredKey);
+                console.log('FRED key set:', cleanFredKey.substring(0, 8) + '...');
+            }
+            if (timegptKey) {
+                const cleanTimegptKey = timegptKey.replace('NIXTLA_API_KEY=', '');
+                localStorage.setItem('timegpt_api_key', cleanTimegptKey);
+                console.log('TimeGPT key set');
+            }
+            if (openaiKey) {
+                const cleanOpenaiKey = openaiKey.replace('OPENAI_API_KEY=', '');
+                localStorage.setItem('openai_api_key', cleanOpenaiKey);
+                console.log('OpenAI key set');
+            }
             
-            console.log('API keys configured successfully');
-            location.reload(); // Refresh to load with new keys
+            console.log('API keys configured successfully - you can now load FRED data');
+            // Don't auto-reload, let user test manually
         };
         
         // Settings modal functions
@@ -275,13 +287,24 @@
             const timegptKey = document.getElementById('timegptKeyInput').value.trim();
             const openaiKey = document.getElementById('openaiKeyInput').value.trim();
             
-            if (fredKey) localStorage.setItem('fred_api_key', fredKey);
-            if (timegptKey) localStorage.setItem('timegpt_api_key', timegptKey);
-            if (openaiKey) localStorage.setItem('openai_api_key', openaiKey);
+            // Clean API key format (remove any prefixes)
+            if (fredKey) {
+                const cleanFredKey = fredKey.replace('FRED_API_KEY=', '');
+                localStorage.setItem('fred_api_key', cleanFredKey);
+                console.log('Saved FRED key:', cleanFredKey.substring(0, 8) + '...');
+            }
+            if (timegptKey) {
+                const cleanTimegptKey = timegptKey.replace('NIXTLA_API_KEY=', '');
+                localStorage.setItem('timegpt_api_key', cleanTimegptKey);
+            }
+            if (openaiKey) {
+                const cleanOpenaiKey = openaiKey.replace('OPENAI_API_KEY=', '');
+                localStorage.setItem('openai_api_key', cleanOpenaiKey);
+            }
             
             updateApiStatus();
             closeSettings();
-            addChatMessage('✅ API keys saved successfully!', 'ai');
+            addChatMessage('✅ API keys saved successfully! Try loading FRED data now.', 'ai');
         }
         
         function clearApiKeys() {
@@ -356,28 +379,41 @@
                 // Try multiple approaches for CORS issues
                 let data = null;
                 
+                // Debug API key format
+                console.log('Using API key:', apiKey.substring(0, 10) + '...');
+                console.log('FRED URL:', fredUrl.substring(0, 100) + '...');
+                
                 try {
-                    // Approach 1: Direct fetch (works in some environments)
+                    // Approach 1: Direct fetch (will fail due to CORS but let's try)
                     const response = await fetch(fredUrl);
                     if (response.ok) {
                         data = await response.json();
+                        addChatMessage(`✅ Direct FRED API successful!`, 'ai');
                     }
                 } catch (directError) {
-                    console.log('Direct FRED API failed:', directError.message);
+                    console.log('Direct FRED API failed (expected due to CORS):', directError.message);
                     
                     try {
-                        // Approach 2: Try with different CORS proxy
+                        // Approach 2: Try with CORS proxy
                         const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(fredUrl)}`;
+                        console.log('Trying proxy:', proxyUrl.substring(0, 80) + '...');
                         const proxyResponse = await fetch(proxyUrl);
                         if (proxyResponse.ok) {
                             const proxyData = await proxyResponse.json();
-                            data = JSON.parse(proxyData.contents);
+                            if (proxyData.contents) {
+                                data = JSON.parse(proxyData.contents);
+                                addChatMessage(`✅ FRED API via proxy successful!`, 'ai');
+                            } else {
+                                throw new Error('Proxy returned no content');
+                            }
+                        } else {
+                            throw new Error(`Proxy failed: ${proxyResponse.status}`);
                         }
                     } catch (proxyError) {
                         console.log('Proxy FRED API failed:', proxyError.message);
                         // Fall back to demo data
                         data = generateDemoFredData(series);
-                        addChatMessage(`⚠️ Using demo data for ${series} (FRED API unavailable due to CORS restrictions in browser)`, 'ai');
+                        addChatMessage(`⚠️ Using demo data for ${series} (FRED API blocked by CORS - this is normal in browsers)`, 'ai');
                     }
                 }
                 
