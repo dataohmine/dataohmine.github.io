@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- DataOhMine Portfolio - Wildfire Tool Embedded - 2024 -->
+    <!-- DataOhMine Portfolio - Wildfire Tool Working - 2024 -->
     <title>DataOhMine - AI/ML Tools & Enterprise Solutions</title>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -51,6 +51,18 @@
             </div>
         </div>
     </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-white shadow-lg">
+        <div class="px-2 pt-2 pb-3 space-y-1">
+            <a href="#home" class="block px-3 py-2 text-gray-900 hover:text-primary transition duration-300">Home</a>
+            <a href="#tools" class="block px-3 py-2 text-gray-900 hover:text-primary transition duration-300">Tools</a>
+            <a href="#tech-stack" class="block px-3 py-2 text-gray-900 hover:text-primary transition duration-300">Tech Stack</a>
+            <a href="https://github.com/dataohmine" class="block px-3 py-2 text-primary font-semibold">
+                <i class="fab fa-github mr-2"></i>GitHub
+            </a>
+        </div>
+    </div>
 
     <!-- Hero Section -->
     <section id="home" class="bg-gradient-to-br from-primary to-secondary text-white py-20">
@@ -113,7 +125,7 @@
                             <span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded">OpenAI</span>
                             <span class="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded">Emergency</span>
                         </div>
-                        <a href="wildfire-predictor/index.html" class="text-primary hover:text-secondary font-semibold" target="_blank">Launch Tool →</a>
+                        <a href="wildfire-predictor/index.html" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-300 inline-block font-semibold">🔥 Launch Tool</a>
                     </div>
                 </div>
 
@@ -299,18 +311,6 @@
         </div>
     </footer>
 
-    <!-- Mobile Menu -->
-    <div id="mobile-menu" class="hidden md:hidden bg-white shadow-lg">
-        <div class="px-2 pt-2 pb-3 space-y-1">
-            <a href="#home" class="block px-3 py-2 text-gray-900 hover:text-primary transition duration-300">Home</a>
-            <a href="#tools" class="block px-3 py-2 text-gray-900 hover:text-primary transition duration-300">Tools</a>
-            <a href="#tech-stack" class="block px-3 py-2 text-gray-900 hover:text-primary transition duration-300">Tech Stack</a>
-            <a href="https://github.com/dataohmine" class="block px-3 py-2 text-primary font-semibold">
-                <i class="fab fa-github mr-2"></i>GitHub
-            </a>
-        </div>
-    </div>
-
     <!-- Mobile Menu Toggle Script -->
     <script>
         document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
@@ -345,275 +345,6 @@
                     document.querySelector('.mobile-menu-btn').innerHTML = '<i class="fas fa-bars text-xl"></i>';
                 }
             });
-        });
-    </script>
-
-    <!-- Wildfire Tool Modal -->
-    <div id="wildfireModal" class="hidden fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50">
-        <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-auto">
-                <!-- Modal Header -->
-                <div class="flex items-center justify-between p-6 border-b">
-                    <div class="flex items-center">
-                        <i class="fas fa-fire text-red-500 text-2xl mr-3"></i>
-                        <h2 class="text-2xl font-bold text-gray-900">Wildfire Risk Assessment</h2>
-                    </div>
-                    <button onclick="closeWildfireModal()" class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times text-2xl"></i>
-                    </button>
-                </div>
-
-                <!-- Modal Content -->
-                <div class="p-6">
-                    <!-- Alert Banner -->
-                    <div id="modalAlertBanner" class="mb-4 bg-red-600 text-white py-2 px-4 rounded-lg">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <i class="fas fa-exclamation-triangle mr-2"></i>
-                                <span>High wildfire risk detected in Ventura County!</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Current Risk Level -->
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                        <div class="lg:col-span-2">
-                            <div class="bg-gray-50 rounded-xl p-6">
-                                <div class="flex items-center justify-between mb-4">
-                                    <h3 class="text-xl font-semibold text-gray-900">Current Risk Level</h3>
-                                    <div class="text-sm text-gray-500" id="modalLastUpdated">Last updated: Just now</div>
-                                </div>
-                                
-                                <div class="text-center mb-6">
-                                    <div class="relative w-40 h-40 mx-auto mb-4">
-                                        <canvas id="modalRiskGauge" width="160" height="160"></canvas>
-                                        <div class="absolute inset-0 flex items-center justify-center">
-                                            <div class="text-center">
-                                                <div id="modalRiskScore" class="text-2xl font-bold">75</div>
-                                                <div id="modalRiskLevel" class="text-lg font-semibold text-orange-600">HIGH</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <p id="modalRiskDescription" class="text-gray-600">Elevated wildfire conditions detected. Exercise caution in high-risk areas.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Weather Conditions -->
-                        <div class="bg-gray-50 rounded-xl p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Current Weather</h3>
-                            <div class="space-y-3">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <i class="fas fa-thermometer-half text-red-500 mr-2"></i>
-                                        <span class="text-gray-600 text-sm">Temperature</span>
-                                    </div>
-                                    <span id="modalTemperature" class="font-semibold">87°F</span>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <i class="fas fa-tint text-blue-500 mr-2"></i>
-                                        <span class="text-gray-600 text-sm">Humidity</span>
-                                    </div>
-                                    <span id="modalHumidity" class="font-semibold">15%</span>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <i class="fas fa-wind text-gray-500 mr-2"></i>
-                                        <span class="text-gray-600 text-sm">Wind Speed</span>
-                                    </div>
-                                    <span id="modalWindSpeed" class="font-semibold">25 mph</span>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <i class="fas fa-eye text-purple-500 mr-2"></i>
-                                        <span class="text-gray-600 text-sm">Visibility</span>
-                                    </div>
-                                    <span id="modalVisibility" class="font-semibold">8 miles</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- AI Insights -->
-                    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded mb-6">
-                        <div class="flex items-start">
-                            <i class="fas fa-robot text-blue-600 text-lg mr-3 mt-1"></i>
-                            <div>
-                                <h4 class="font-semibold text-blue-900 mb-2">AI Analysis & Recommendations</h4>
-                                <p class="text-blue-800 mb-3">Based on current weather conditions and historical patterns, wildfire risk is elevated in Ventura County. High temperatures (87°F), low humidity (15%), and moderate winds (25 mph) create favorable conditions for fire ignition and spread.</p>
-                                
-                                <h4 class="font-semibold text-blue-900 mb-2">Recommendations</h4>
-                                <ul class="text-blue-800 space-y-1 text-sm">
-                                    <li>• Avoid outdoor burning or activities that could create sparks</li>
-                                    <li>• Maintain defensible space around structures</li>
-                                    <li>• Keep emergency evacuation plans readily available</li>
-                                    <li>• Monitor local emergency alerts and weather updates</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Location-Specific Alerts -->
-                    <div class="space-y-3">
-                        <h4 class="font-semibold text-gray-900">Area-Specific Alerts</h4>
-                        
-                        <div class="flex items-center p-3 bg-red-50 border-l-4 border-red-400 rounded text-sm">
-                            <i class="fas fa-exclamation-triangle text-red-600 text-lg mr-3"></i>
-                            <div class="flex-1">
-                                <h5 class="font-semibold text-red-900">Simi Valley - HIGH RISK</h5>
-                                <p class="text-red-800">Extreme fire weather conditions. Red Flag Warning in effect.</p>
-                            </div>
-                            <span class="text-xs text-red-600">Active</span>
-                        </div>
-
-                        <div class="flex items-center p-3 bg-orange-50 border-l-4 border-orange-400 rounded text-sm">
-                            <i class="fas fa-fire text-orange-600 text-lg mr-3"></i>
-                            <div class="flex-1">
-                                <h5 class="font-semibold text-orange-900">Thousand Oaks - MODERATE RISK</h5>
-                                <p class="text-orange-800">Elevated conditions due to Santa Ana winds.</p>
-                            </div>
-                            <span class="text-xs text-orange-600">Monitoring</span>
-                        </div>
-
-                        <div class="flex items-center p-3 bg-green-50 border-l-4 border-green-400 rounded text-sm">
-                            <i class="fas fa-check-circle text-green-600 text-lg mr-3"></i>
-                            <div class="flex-1">
-                                <h5 class="font-semibold text-green-900">Oxnard - LOW RISK</h5>
-                                <p class="text-green-800">Coastal marine layer providing protection.</p>
-                            </div>
-                            <span class="text-xs text-green-600">Normal</span>
-                        </div>
-                    </div>
-
-                    <!-- Refresh Button -->
-                    <div class="mt-6 text-center">
-                        <button onclick="refreshModalData()" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-secondary transition duration-300">
-                            <i class="fas fa-sync-alt mr-2"></i>Refresh Data
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Wildfire Tool JavaScript -->
-    <script>
-        let modalRiskScore = 75;
-        let modalWeatherData = {
-            temperature: 87,
-            humidity: 15,
-            windSpeed: 25,
-            visibility: 8
-        };
-
-        function openWildfireModal() {
-            document.getElementById('wildfireModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden'; // Prevent background scrolling
-            initializeModalWildfire();
-        }
-
-        function closeWildfireModal() {
-            document.getElementById('wildfireModal').classList.add('hidden');
-            document.body.style.overflow = 'auto'; // Restore scrolling
-        }
-
-        function initializeModalWildfire() {
-            updateModalRiskGauge();
-            updateModalWeatherData();
-            updateModalTimestamp();
-        }
-
-        function updateModalRiskGauge() {
-            const canvas = document.getElementById('modalRiskGauge');
-            const ctx = canvas.getContext('2d');
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            const radius = 60;
-
-            // Clear canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw background arc
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, Math.PI, 2 * Math.PI);
-            ctx.lineWidth = 15;
-            ctx.strokeStyle = '#e5e7eb';
-            ctx.stroke();
-
-            // Draw risk arc
-            const riskAngle = Math.PI + (modalRiskScore / 100) * Math.PI;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, Math.PI, riskAngle);
-            ctx.lineWidth = 15;
-            
-            if (modalRiskScore < 30) {
-                ctx.strokeStyle = '#10B981'; // Green
-            } else if (modalRiskScore < 70) {
-                ctx.strokeStyle = '#F59E0B'; // Orange
-            } else {
-                ctx.strokeStyle = '#EF4444'; // Red
-            }
-            ctx.stroke();
-
-            // Update text
-            document.getElementById('modalRiskScore').textContent = modalRiskScore;
-            
-            let riskLevel, riskDescription;
-            if (modalRiskScore < 30) {
-                riskLevel = 'LOW';
-                riskDescription = 'Current conditions pose minimal wildfire risk.';
-            } else if (modalRiskScore < 70) {
-                riskLevel = 'MODERATE';
-                riskDescription = 'Be aware of fire conditions and exercise normal precautions.';
-            } else {
-                riskLevel = 'HIGH';
-                riskDescription = 'Elevated wildfire conditions detected. Exercise caution in high-risk areas.';
-            }
-            
-            document.getElementById('modalRiskLevel').textContent = riskLevel;
-            document.getElementById('modalRiskLevel').className = `text-lg font-semibold ${modalRiskScore < 30 ? 'text-green-600' : modalRiskScore < 70 ? 'text-orange-600' : 'text-red-600'}`;
-            document.getElementById('modalRiskDescription').textContent = riskDescription;
-        }
-
-        function updateModalWeatherData() {
-            document.getElementById('modalTemperature').textContent = modalWeatherData.temperature + '°F';
-            document.getElementById('modalHumidity').textContent = modalWeatherData.humidity + '%';
-            document.getElementById('modalWindSpeed').textContent = modalWeatherData.windSpeed + ' mph';
-            document.getElementById('modalVisibility').textContent = modalWeatherData.visibility + ' miles';
-        }
-
-        function updateModalTimestamp() {
-            const now = new Date();
-            document.getElementById('modalLastUpdated').textContent = `Last updated: ${now.toLocaleTimeString()}`;
-        }
-
-        function refreshModalData() {
-            // Simulate new data
-            modalRiskScore = Math.floor(Math.random() * 40) + 40;
-            modalWeatherData.temperature = Math.floor(Math.random() * 20) + 75;
-            modalWeatherData.humidity = Math.floor(Math.random() * 25) + 10;
-            modalWeatherData.windSpeed = Math.floor(Math.random() * 20) + 10;
-            modalWeatherData.visibility = Math.floor(Math.random() * 5) + 5;
-
-            // Update display
-            updateModalRiskGauge();
-            updateModalWeatherData();
-            updateModalTimestamp();
-        }
-
-        // Close modal when clicking outside
-        document.addEventListener('click', function(event) {
-            if (event.target.id === 'wildfireModal') {
-                closeWildfireModal();
-            }
-        });
-
-        // Close modal with escape key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape' && !document.getElementById('wildfireModal').classList.contains('hidden')) {
-                closeWildfireModal();
-            }
         });
     </script>
 </body>
