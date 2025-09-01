@@ -873,7 +873,7 @@
                     stepIndex++;
                 } else {
                     clearInterval(interval);
-                    setTimeout(() => {
+                    setTimeout(async () => {
                         // Generate enhanced property data with AI insights
                         const propertyData = await generateAdvancedProperty();
                         displayGeneratedListing(propertyData);
