@@ -707,7 +707,23 @@
             // TimeGPT returns different formats, try to handle them
             let forecastData = [];
             
-            // Check for common TimeGPT response fields
+            // Handle TimeGPT response format: {timestamp: [...], value: [...]}
+            if (result.timestamp && result.value && 
+                Array.isArray(result.timestamp) && Array.isArray(result.value) &&
+                result.timestamp.length === result.value.length) {
+                
+                console.log('Found TimeGPT format with timestamp/value arrays');
+                forecastData = result.timestamp.map((timestamp, index) => ({
+                    date: timestamp.split(' ')[0], // Extract date part from "2016-01-14 00:00:00"
+                    value: parseFloat(result.value[index]),
+                    isForecast: true
+                }));
+                
+                console.log('Processed TimeGPT forecast:', forecastData.length, 'points');
+                return forecastData;
+            }
+            
+            // Check for other common TimeGPT response fields as fallback
             const possibleDataFields = ['data', 'forecast', 'predictions', 'values', 'TimegGPT', 'timegpt'];
             let dataSource = null;
             
@@ -1025,6 +1041,9 @@
             const adjustedPeriods = unit === 'm' ? periods : periods * 3; // Quarters to months
             
             const forecast = await generateForecast(currentData, adjustedPeriods, subject);
+            console.log('Generated forecast:', forecast ? forecast.length : 'null', 'points');
+            console.log('Current data:', currentData ? currentData.length : 'null', 'points');
+            console.log('Chart object:', forecastChart ? 'initialized' : 'null');
             updateChart(currentData, forecast);
             
             // Generate explanation using AI
