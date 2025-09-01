@@ -26,7 +26,10 @@
                 </div>
                 <div class="flex items-center space-x-4">
                     <a href="index.html" class="text-gray-600 hover:text-blue-600">← Portfolio</a>
-                    <div class="text-green-600 text-sm">
+                    <button id="settingsBtn" class="text-gray-600 hover:text-blue-600 text-sm">
+                        <i class="fas fa-cog mr-1"></i>Settings
+                    </button>
+                    <div id="apiStatus" class="text-green-600 text-sm">
                         <i class="fas fa-check-circle mr-1"></i>APIs Ready
                     </div>
                 </div>
@@ -188,12 +191,24 @@
             setupEventListeners();
             initializeChart();
             await loadApiKeys();
+            updateApiStatus();
         });
 
         // Event listeners setup
         function setupEventListeners() {
             document.getElementById('chatInput').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') sendChatMessage();
+            });
+            
+            // Settings modal listeners
+            document.getElementById('settingsBtn').addEventListener('click', openSettings);
+            document.getElementById('closeSettingsBtn').addEventListener('click', closeSettings);
+            document.getElementById('saveKeysBtn').addEventListener('click', saveApiKeys);
+            document.getElementById('clearKeysBtn').addEventListener('click', clearApiKeys);
+            
+            // Close modal on background click
+            document.getElementById('settingsModal').addEventListener('click', function(e) {
+                if (e.target === this) closeSettings();
             });
         }
 
@@ -225,7 +240,7 @@
             if (!existingTimeGPT) missingKeys.push('TimeGPT');
             if (!existingOpenAI) missingKeys.push('OpenAI');
             
-            const configMsg = `📋 **Demo Configuration**\n\nAPI keys needed for full functionality:\n${missingKeys.map(key => `• ${key} API key`).join('\n')}\n\n**Quick Setup (Browser Console):**\n\`setApiKeys('fred_key', 'timegpt_key', 'openai_key')\`\n\n*For production: use secure environment variables.*`;
+            const configMsg = `📋 **API Configuration Needed**\n\nMissing keys for full functionality:\n${missingKeys.map(key => `• ${key} API key`).join('\n')}\n\n**Setup Options:**\n• Click "Settings" button above to configure via UI\n• Browser console: \`setApiKeys('fred_key', 'timegpt_key', 'openai_key')\`\n\n*Keys are stored locally and secure.*`;
             
             addChatMessage(configMsg, 'ai');
             console.log('API keys not found - user configuration required');
@@ -240,6 +255,62 @@
             console.log('API keys configured successfully');
             location.reload(); // Refresh to load with new keys
         };
+        
+        // Settings modal functions
+        function openSettings() {
+            // Load existing keys into form
+            document.getElementById('fredKeyInput').value = localStorage.getItem('fred_api_key') || '';
+            document.getElementById('timegptKeyInput').value = localStorage.getItem('timegpt_api_key') || '';
+            document.getElementById('openaiKeyInput').value = localStorage.getItem('openai_api_key') || '';
+            
+            document.getElementById('settingsModal').classList.remove('hidden');
+        }
+        
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.add('hidden');
+        }
+        
+        function saveApiKeys() {
+            const fredKey = document.getElementById('fredKeyInput').value.trim();
+            const timegptKey = document.getElementById('timegptKeyInput').value.trim();
+            const openaiKey = document.getElementById('openaiKeyInput').value.trim();
+            
+            if (fredKey) localStorage.setItem('fred_api_key', fredKey);
+            if (timegptKey) localStorage.setItem('timegpt_api_key', timegptKey);
+            if (openaiKey) localStorage.setItem('openai_api_key', openaiKey);
+            
+            updateApiStatus();
+            closeSettings();
+            addChatMessage('✅ API keys saved successfully!', 'ai');
+        }
+        
+        function clearApiKeys() {
+            localStorage.removeItem('fred_api_key');
+            localStorage.removeItem('timegpt_api_key');
+            localStorage.removeItem('openai_api_key');
+            
+            document.getElementById('fredKeyInput').value = '';
+            document.getElementById('timegptKeyInput').value = '';
+            document.getElementById('openaiKeyInput').value = '';
+            
+            updateApiStatus();
+            addChatMessage('🗑️ All API keys cleared', 'ai');
+        }
+        
+        function updateApiStatus() {
+            const hasKeys = localStorage.getItem('fred_api_key') && 
+                           localStorage.getItem('timegpt_api_key') && 
+                           localStorage.getItem('openai_api_key');
+                           
+            const statusEl = document.getElementById('apiStatus');
+            if (hasKeys) {
+                statusEl.innerHTML = '<i class="fas fa-check-circle mr-1"></i>APIs Ready';
+                statusEl.className = 'text-green-600 text-sm';
+            } else {
+                statusEl.innerHTML = '<i class="fas fa-exclamation-triangle mr-1"></i>Keys Needed';
+                statusEl.className = 'text-orange-600 text-sm';
+            }
+        }
 
         function updateStatusInfo(type, message) {
             const statusInfo = document.getElementById('statusInfo');
@@ -833,5 +904,57 @@ For best results, ensure clean, consistent time series data with sufficient hist
         }
 
     </script>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">API Configuration</h3>
+                    <button id="closeSettingsBtn" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">FRED API Key</label>
+                        <input type="password" id="fredKeyInput" placeholder="Enter FRED API key" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <p class="text-xs text-gray-500 mt-1">Get from <a href="https://fredaccount.stlouisfed.org/apikeys" target="_blank" class="text-blue-600">FRED API Keys</a></p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">TimeGPT API Key (Nixtla)</label>
+                        <input type="password" id="timegptKeyInput" placeholder="Enter TimeGPT API key" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <p class="text-xs text-gray-500 mt-1">Get from <a href="https://dashboard.nixtla.io" target="_blank" class="text-blue-600">Nixtla Dashboard</a></p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">OpenAI API Key</label>
+                        <input type="password" id="openaiKeyInput" placeholder="Enter OpenAI API key" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <p class="text-xs text-gray-500 mt-1">Get from <a href="https://platform.openai.com/api-keys" target="_blank" class="text-blue-600">OpenAI Platform</a></p>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-3 mt-6">
+                    <button id="saveKeysBtn" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium">
+                        Save Keys
+                    </button>
+                    <button id="clearKeysBtn" class="px-4 py-2 text-gray-600 hover:text-gray-800 text-sm">
+                        Clear All
+                    </button>
+                </div>
+                
+                <div class="mt-4 p-3 bg-gray-50 rounded-lg text-xs text-gray-600">
+                    <i class="fas fa-shield-alt mr-1"></i>
+                    Keys are stored locally in your browser and never sent to external servers.
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
