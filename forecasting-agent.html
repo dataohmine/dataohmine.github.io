@@ -1268,7 +1268,7 @@
                 const variance = values.reduce((a, b) => a + Math.pow(b - mean, 2)) / values.length;
                 const volatility = Math.sqrt(variance).toFixed(2);
 
-                const prompt = `As a senior economic analyst, provide a comprehensive analysis of this ${subject} forecast using TimeGPT AI predictions:
+                const prompt = `As a senior economic analyst, provide an analysis of this ${subject} forecast using TimeGPT AI predictions:
 
 **📊 CURRENT ECONOMIC SITUATION:**
 - Current ${subject}: ${latestValue} (as of ${historicalData[historicalData.length - 1]?.date})
@@ -1282,33 +1282,6 @@
 - End projection: ${forecastEnd?.toFixed(2)} (final period)
 - Net change: ${changePct}% ${trendDirection} over forecast period
 - Forecast trajectory: ${forecast.slice(0, 3).map(d => d.value.toFixed(2)).join(' → ')}...
-
-**🏛️ ECONOMIC IMPLICATIONS & INSIGHTS:**
-
-**1. TREND ANALYSIS**
-• Historical Context: Analyze what drove recent ${recentTrend} trend of ${recentChangePct}%
-• Pattern Recognition: Identify seasonal or cyclical patterns in the data
-• Structural Factors: What underlying economic forces are at play?
-
-**2. FORECAST INTERPRETATION** 
-• Short-term Outlook (1-3 periods): What does TimeGPT see immediately ahead?
-• Medium-term Trajectory: How does the ${trendDirection} trend develop?
-• Policy Implications: What this means for economic policy and decision-making
-
-**3. MARKET & ECONOMIC CONTEXT**
-• Broader Economic Impact: How this affects GDP, employment, inflation
-• Sector Analysis: Which industries and demographics are most affected
-• International Comparison: How this compares to global economic trends
-
-**4. RISK ASSESSMENT & SCENARIOS**
-• Upside Risks: What could drive ${subject} higher than forecast?
-• Downside Risks: What factors could cause underperformance?
-• Confidence Level: Rate forecast reliability (1-10) with justification
-
-**5. ACTIONABLE INSIGHTS**
-• For Policymakers: Key policy implications and recommended responses  
-• For Businesses: Strategic planning implications and sector impacts
-• For Investors: Market timing and investment strategy considerations
 
 Provide specific, data-driven analysis with professional economic terminology. Use the actual forecast values and dates throughout the analysis.`;
 
