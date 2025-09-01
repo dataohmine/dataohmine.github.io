@@ -291,16 +291,36 @@
                 </div>
             </div>
             <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-                <p>&copy; 2025 DataOhMine. Professional AI/ML tools and enterprise solutions.</p>
+                <p>&copy; 2024 DataOhMine. Professional AI/ML tools and enterprise solutions.</p>
             </div>
         </div>
     </footer>
 
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-white shadow-lg">
+        <div class="px-2 pt-2 pb-3 space-y-1">
+            <a href="#home" class="block px-3 py-2 text-gray-900 hover:text-primary transition duration-300">Home</a>
+            <a href="#tools" class="block px-3 py-2 text-gray-900 hover:text-primary transition duration-300">Tools</a>
+            <a href="#tech-stack" class="block px-3 py-2 text-gray-900 hover:text-primary transition duration-300">Tech Stack</a>
+            <a href="https://github.com/dataohmine" class="block px-3 py-2 text-primary font-semibold">
+                <i class="fab fa-github mr-2"></i>GitHub
+            </a>
+        </div>
+    </div>
+
     <!-- Mobile Menu Toggle Script -->
     <script>
         document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
-            // Add mobile menu functionality here
-            alert('Mobile menu functionality can be added here');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const isHidden = mobileMenu.classList.contains('hidden');
+            
+            if (isHidden) {
+                mobileMenu.classList.remove('hidden');
+                this.innerHTML = '<i class="fas fa-times text-xl"></i>';
+            } else {
+                mobileMenu.classList.add('hidden');
+                this.innerHTML = '<i class="fas fa-bars text-xl"></i>';
+            }
         });
 
         // Smooth scrolling for anchor links
@@ -313,6 +333,13 @@
                         behavior: 'smooth',
                         block: 'start'
                     });
+                }
+                
+                // Close mobile menu if open
+                const mobileMenu = document.getElementById('mobile-menu');
+                if (!mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                    document.querySelector('.mobile-menu-btn').innerHTML = '<i class="fas fa-bars text-xl"></i>';
                 }
             });
         });

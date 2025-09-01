@@ -1,0 +1,96 @@
+{
+  "target_column": "collection_success",
+  
+  "data_sources": [
+    {
+      "name": "system_a",
+      "path": "data/raw/system_a_data.csv",
+      "type": "csv"
+    },
+    {
+      "name": "system_b",
+      "path": "data/raw/system_b_data.csv",
+      "type": "csv"
+    }
+  ],
+  
+  "data_consolidation": {
+    "column_mappings": {
+      "system_a": {
+        "acc_id": "account_id",
+        "loan_num": "loan_number",
+        "amt_due": "amount_due",
+        "last_pay": "last_payment_date"
+      },
+      "system_b": {
+        "account": "account_id",
+        "loan": "loan_number",
+        "balance": "amount_due",
+        "payment_date": "last_payment_date"
+      }
+    },
+    "data_types": {
+      "account_id": "str",
+      "loan_number": "str",
+      "amount_due": "float",
+      "last_payment_date": "datetime",
+      "credit_score": "float",
+      "annual_income": "float"
+    },
+    "deduplication_keys": ["account_id", "loan_number"]
+  },
+  
+  "feature_engineering": {
+    "date_columns": ["last_payment_date", "loan_origination_date"],
+    "categorical_columns": ["state", "loan_type", "property_type", "employment_status"],
+    "numerical_columns": ["loan_amount", "annual_income", "credit_score", "debt_to_income"],
+    "interaction_pairs": [
+      ["loan_amount", "annual_income"],
+      ["credit_score", "debt_to_income"],
+      ["days_delinquent", "payment_frequency"]
+    ],
+    "max_features": 100
+  },
+  
+  "model_training": {
+    "random_seed": 42,
+    "test_size": 0.2,
+    "optimize_hyperparameters": true,
+    "optimization_trials": 100,
+    "default_params": {
+      "objective": "binary",
+      "metric": "auc",
+      "boosting_type": "gbdt",
+      "num_leaves": 31,
+      "learning_rate": 0.05,
+      "feature_fraction": 0.9,
+      "bagging_fraction": 0.8,
+      "bagging_freq": 5,
+      "verbosity": -1
+    }
+  },
+  
+  "ab_testing": {
+    "experiment_id": "COLLECTIONS_AB_001",
+    "alpha": 0.05,
+    "expected_effect_size": 0.2,
+    "minimum_effect_size": 0.1,
+    "minimum_lift": 0.05,
+    "expected_ratio": 0.5,
+    "stratify_columns": ["credit_tier", "state"],
+    "balance_columns": ["credit_score", "loan_amount", "annual_income", "age"],
+    "outcome_type": "binary",
+    "base_success_rate": 0.3,
+    "treatment_lift": 0.15
+  },
+  
+  "paths": {
+    "consolidated_data": "data/processed/consolidated_data.parquet",
+    "engineered_features": "data/processed/engineered_features.parquet",
+    "feature_list": "data/processed/selected_features.json",
+    "model": "models/lightgbm_model.pkl",
+    "model_metadata": "models/model_metadata.json",
+    "ab_test_results": "results/ab_test_results.json",
+    "ab_test_report": "results/ab_test_report.txt"
+  }
+}

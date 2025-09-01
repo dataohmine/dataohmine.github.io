@@ -1,0 +1,82 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environment variables
+.env
+api.env
+*.env
+
+# Data files
+data/raw/
+data/processed/
+*.csv
+*.parquet
+*.pkl
+*.json
+!config.json
+!requirements.txt
+
+# Model files
+models/
+*.joblib
+*.pkl
+*.h5
+*.pt
+*.pth
+
+# Results and logs
+results/
+logs/
+*.log
+collections_model.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# API keys and secrets
+*api_key*
+*secret*
+*token*
