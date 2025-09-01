@@ -191,11 +191,49 @@
             console.log('DOM loaded, initializing app...');
             console.log('Chart.js available:', typeof Chart !== 'undefined');
             setupEventListeners();
-            initializeChart();
-            console.log('Chart initialized, forecastChart:', forecastChart);
+            
+            // Initialize chart with retry mechanism
+            await initializeChartWithRetry();
+            
             await loadApiKeys();
             updateApiStatus();
         });
+        
+        // Chart initialization with retry for loading issues
+        async function initializeChartWithRetry(maxRetries = 3) {
+            for (let i = 0; i < maxRetries; i++) {
+                console.log(`Chart initialization attempt ${i + 1}/${maxRetries}`);
+                
+                if (typeof Chart !== 'undefined') {
+                    initializeChart();
+                    if (forecastChart) {
+                        console.log('Chart successfully initialized on attempt', i + 1);
+                        return;
+                    }
+                }
+                
+                // Wait a bit for Chart.js to load
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            console.error('Chart initialization failed after', maxRetries, 'attempts');
+            
+            // Fallback: Create a simple data display div
+            createFallbackChart();
+        }
+        
+        function createFallbackChart() {
+            const chartContainer = document.querySelector('#forecastChart').parentElement;
+            if (chartContainer) {
+                chartContainer.innerHTML = `
+                    <div id="fallbackChart" class="bg-gray-50 p-4 rounded-lg border">
+                        <h3 class="text-lg font-semibold mb-2">Forecast Data</h3>
+                        <div id="chartData">Chart loading... If this persists, data will be displayed in table format.</div>
+                    </div>
+                `;
+                console.log('Fallback chart container created');
+            }
+        }
 
         // Event listeners setup
         function setupEventListeners() {
@@ -944,18 +982,10 @@
         function updateChart(data, forecast = []) {
             if (!forecastChart || !data) {
                 console.log('Chart update skipped - missing chart or data');
-                console.log('Attempting to reinitialize chart...');
                 
-                // Try to reinitialize chart if it's missing
-                if (!forecastChart && typeof Chart !== 'undefined') {
-                    initializeChart();
-                    if (!forecastChart) {
-                        console.error('Chart initialization failed');
-                        return;
-                    }
-                } else {
-                    return;
-                }
+                // Try fallback display
+                updateFallbackChart(data, forecast);
+                return;
             }
 
             console.log('Updating chart with:', data.length, 'historical points,', forecast.length, 'forecast points');
@@ -1006,6 +1036,53 @@
             setTimeout(() => {
                 forecastChart.update('none');
             }, 100);
+        }
+        
+        function updateFallbackChart(data, forecast = []) {
+            const fallbackDiv = document.getElementById('chartData');
+            if (!fallbackDiv) {
+                console.log('No fallback chart container found');
+                return;
+            }
+            
+            console.log('Updating fallback chart display');
+            
+            const latestHistorical = data.slice(-5);
+            const forecastDisplay = forecast.slice(0, 7);
+            
+            const html = `
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="font-semibold text-blue-600 mb-2">📈 Recent Historical Data</h4>
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                            ${latestHistorical.map(d => `
+                                <div class="bg-blue-50 p-2 rounded">
+                                    <span class="font-mono">${d.date}</span>: <strong>${d.value}</strong>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-semibold text-red-600 mb-2">🔮 TimeGPT Forecast</h4>
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                            ${forecastDisplay.map(d => `
+                                <div class="bg-red-50 p-2 rounded border-l-4 border-red-200">
+                                    <span class="font-mono">${d.date}</span>: <strong>${d.value.toFixed(2)}</strong>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="bg-yellow-50 p-3 rounded border border-yellow-200">
+                        <p class="text-sm text-yellow-800">
+                            📊 <strong>Chart display unavailable</strong> - Data shown in table format above
+                        </p>
+                    </div>
+                </div>
+            `;
+            
+            fallbackDiv.innerHTML = html;
         }
 
         // Chat Interface
@@ -1093,30 +1170,67 @@
 
             try {
                 const latestValue = historicalData[historicalData.length - 1]?.value;
+                const forecastStart = forecast[0]?.value;
                 const forecastEnd = forecast[forecast.length - 1]?.value;
                 const trendDirection = forecastEnd > latestValue ? 'increase' : 'decrease';
                 const changePct = ((forecastEnd - latestValue) / latestValue * 100).toFixed(1);
+                
+                // Calculate recent trend
+                const recentData = historicalData.slice(-12); // Last 12 periods
+                const firstRecent = recentData[0]?.value;
+                const lastRecent = recentData[recentData.length - 1]?.value;
+                const recentTrend = lastRecent > firstRecent ? 'upward' : 'downward';
+                const recentChangePct = ((lastRecent - firstRecent) / firstRecent * 100).toFixed(1);
+                
+                // Calculate volatility
+                const values = recentData.map(d => parseFloat(d.value));
+                const mean = values.reduce((a, b) => a + b) / values.length;
+                const variance = values.reduce((a, b) => a + Math.pow(b - mean, 2)) / values.length;
+                const volatility = Math.sqrt(variance).toFixed(2);
 
-                const prompt = `As an economic analyst, provide a comprehensive forecast narrative for ${subject}:
+                const prompt = `As a senior economic analyst, provide a comprehensive analysis of this ${subject} forecast using TimeGPT AI predictions:
 
-**CURRENT DATA:**
-- Latest actual value: ${latestValue} (${historicalData[historicalData.length - 1]?.date})
-- Historical trend (last 5 periods): ${historicalData.slice(-5).map(d => `${d.date}: ${d.value}`).join(', ')}
+**📊 CURRENT ECONOMIC SITUATION:**
+- Current ${subject}: ${latestValue} (as of ${historicalData[historicalData.length - 1]?.date})
+- 12-month trend: ${recentChangePct}% ${recentTrend} movement
+- Recent volatility: ${volatility} (standard deviation)
+- Historical context: ${historicalData.slice(-6).map(d => `${d.date.slice(5)}: ${d.value}`).join(' → ')}
 
-**FORECAST RESULTS:**
-- Forecast period: ${forecast.length} periods ahead
-- Projected end value: ${forecastEnd?.toFixed(2)}
-- Expected change: ${changePct}% ${trendDirection}
-- Key forecast points: ${forecast.slice(0, 4).map(d => `${d.date}: ${d.value.toFixed(2)}`).join(', ')}
+**🔮 TIMEGPT AI FORECAST ANALYSIS:**
+- Forecast horizon: ${forecast.length} periods (${forecast[0]?.date} to ${forecast[forecast.length - 1]?.date})
+- Immediate outlook: ${forecastStart?.toFixed(2)} (next period)
+- End projection: ${forecastEnd?.toFixed(2)} (final period)
+- Net change: ${changePct}% ${trendDirection} over forecast period
+- Forecast trajectory: ${forecast.slice(0, 3).map(d => d.value.toFixed(2)).join(' → ')}...
 
-**ANALYSIS REQUIRED:**
-1. **Trend Analysis**: Describe the historical pattern and what drives it
-2. **Forecast Narrative**: Explain the projected ${trendDirection} and timeline
-3. **Economic Context**: What this means for the broader economy
-4. **Risk Assessment**: Key factors that could affect this forecast
-5. **Confidence Level**: Your assessment of forecast reliability
+**🏛️ ECONOMIC IMPLICATIONS & INSIGHTS:**
 
-Format as clear, professional analysis with bullet points and brief paragraphs. Include specific numbers and timeframes.`;
+**1. TREND ANALYSIS**
+• Historical Context: Analyze what drove recent ${recentTrend} trend of ${recentChangePct}%
+• Pattern Recognition: Identify seasonal or cyclical patterns in the data
+• Structural Factors: What underlying economic forces are at play?
+
+**2. FORECAST INTERPRETATION** 
+• Short-term Outlook (1-3 periods): What does TimeGPT see immediately ahead?
+• Medium-term Trajectory: How does the ${trendDirection} trend develop?
+• Policy Implications: What this means for economic policy and decision-making
+
+**3. MARKET & ECONOMIC CONTEXT**
+• Broader Economic Impact: How this affects GDP, employment, inflation
+• Sector Analysis: Which industries and demographics are most affected
+• International Comparison: How this compares to global economic trends
+
+**4. RISK ASSESSMENT & SCENARIOS**
+• Upside Risks: What could drive ${subject} higher than forecast?
+• Downside Risks: What factors could cause underperformance?
+• Confidence Level: Rate forecast reliability (1-10) with justification
+
+**5. ACTIONABLE INSIGHTS**
+• For Policymakers: Key policy implications and recommended responses  
+• For Businesses: Strategic planning implications and sector impacts
+• For Investors: Market timing and investment strategy considerations
+
+Provide specific, data-driven analysis with professional economic terminology. Use the actual forecast values and dates throughout the analysis.`;
 
                 const response = await fetch('https://api.openai.com/v1/chat/completions', {
                     method: 'POST',
