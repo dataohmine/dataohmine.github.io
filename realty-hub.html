@@ -132,51 +132,183 @@
 
         <!-- Dashboard Preview -->
         <div id="dashboard" class="hidden">
+            <!-- Header -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-semibold text-gray-900">Property Listings Dashboard</h2>
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">AI Listing Generator</h2>
+                        <p class="text-gray-600">Upload property photos and generate professional MLS-ready listings in seconds</p>
+                    </div>
                     <div class="flex items-center space-x-4">
-                        <button onclick="showAddListingModal()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition text-sm">
-                            <i class="fas fa-plus mr-2"></i>Add Listing
-                        </button>
                         <span class="text-sm text-gray-500">Welcome, Demo User</span>
                         <button onclick="logout()" class="text-sm text-red-600 hover:text-red-700">
                             <i class="fas fa-sign-out-alt mr-1"></i>Logout
                         </button>
                     </div>
                 </div>
+            </div>
 
-                <!-- Property Search -->
-                <div class="mb-6">
-                    <div class="flex flex-col sm:flex-row gap-4">
-                        <input 
-                            type="text" 
-                            placeholder="Search by address, city, or property type..."
-                            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                        >
-                        <select class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
-                            <option>All Property Types</option>
-                            <option>Single Family</option>
-                            <option>Condo</option>
-                            <option>Townhouse</option>
-                            <option>Multi-Family</option>
-                        </select>
-                        <select class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
-                            <option>All Price Ranges</option>
-                            <option>Under $500K</option>
-                            <option>$500K - $1M</option>
-                            <option>$1M - $2M</option>
-                            <option>Over $2M</option>
-                        </select>
-                        <button class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-secondary transition">
-                            <i class="fas fa-search mr-2"></i>Search
-                        </button>
+            <!-- Main Listing Generation Interface -->
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Upload Section -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                            <i class="fas fa-cloud-upload-alt text-primary mr-3"></i>
+                            Photo Upload & Analysis
+                        </h3>
+                        
+                        <div id="mainUploadArea" class="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:border-primary transition-colors cursor-pointer">
+                            <div class="max-w-md mx-auto">
+                                <i class="fas fa-camera text-6xl text-gray-400 mb-6"></i>
+                                <h4 class="text-xl font-semibold text-gray-700 mb-3">Upload Property Photos</h4>
+                                <p class="text-gray-500 mb-6">Drop your property photos here or click to select. Our AI will analyze them and generate a professional listing description.</p>
+                                
+                                <input type="file" id="mainPhotoUpload" multiple accept="image/*" class="hidden" onchange="handleMainPhotoUpload(event)">
+                                <button onclick="document.getElementById('mainPhotoUpload').click()" class="bg-primary text-white px-8 py-3 rounded-lg hover:bg-secondary transition font-semibold">
+                                    <i class="fas fa-upload mr-2"></i>Select Photos
+                                </button>
+                                
+                                <div class="mt-4 text-sm text-gray-400">
+                                    Supports JPG, PNG, HEIC • Max 20 photos • Up to 10MB each
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Uploaded Photos Preview -->
+                        <div id="mainUploadedPhotos" class="hidden mt-6">
+                            <h4 class="font-semibold mb-3">Uploaded Photos</h4>
+                            <div id="mainPhotoGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"></div>
+                            
+                            <div class="mt-6 flex justify-between items-center">
+                                <button onclick="clearMainPhotos()" class="text-gray-600 hover:text-gray-800">
+                                    <i class="fas fa-trash mr-2"></i>Clear All Photos
+                                </button>
+                                <button id="mainGenerateBtn" onclick="startMainGeneration()" class="bg-primary text-white px-8 py-3 rounded-lg hover:bg-secondary transition font-semibold">
+                                    <i class="fas fa-magic mr-2"></i>Generate Listing
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Generation Progress -->
+                        <div id="mainGenerationProgress" class="hidden mt-6">
+                            <div class="bg-blue-50 rounded-lg p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="font-semibold text-blue-900">Generating Your Listing</h4>
+                                    <span id="mainProgressPercent" class="text-blue-600 font-medium">0%</span>
+                                </div>
+                                
+                                <div class="bg-blue-200 rounded-full h-3 mb-4">
+                                    <div id="mainProgressBar" class="bg-blue-600 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                                
+                                <div id="mainProgressText" class="text-blue-700 text-sm">
+                                    Initializing AI analysis...
+                                </div>
+                                
+                                <div class="mt-4 grid grid-cols-2 gap-4 text-sm">
+                                    <div id="step1" class="flex items-center text-gray-500">
+                                        <i class="fas fa-circle text-xs mr-2"></i>Image Processing
+                                    </div>
+                                    <div id="step2" class="flex items-center text-gray-500">
+                                        <i class="fas fa-circle text-xs mr-2"></i>Feature Detection
+                                    </div>
+                                    <div id="step3" class="flex items-center text-gray-500">
+                                        <i class="fas fa-circle text-xs mr-2"></i>Style Analysis
+                                    </div>
+                                    <div id="step4" class="flex items-center text-gray-500">
+                                        <i class="fas fa-circle text-xs mr-2"></i>Description Generation
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                <!-- Property Grid -->
-                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="propertyGrid">
-                    <!-- Properties will be dynamically generated -->
+                
+                <!-- Results & Stats Panel -->
+                <div class="space-y-6">
+                    <!-- Quick Stats -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <h4 class="font-semibold text-gray-900 mb-4">Today's Activity</h4>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">Listings Generated</span>
+                                <span class="font-semibold text-primary">12</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">Photos Processed</span>
+                                <span class="font-semibold text-blue-600">84</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">Time Saved</span>
+                                <span class="font-semibold text-green-600">3.2 hours</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Listings -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <h4 class="font-semibold text-gray-900 mb-4">Recent Listings</h4>
+                        <div class="space-y-3" id="recentListings">
+                            <!-- Recent listings will be populated here -->
+                            <div class="text-sm text-gray-500 text-center py-4">
+                                No listings generated yet. Upload photos to get started!
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- AI Features -->
+                    <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl border border-blue-200 p-6">
+                        <h4 class="font-semibold text-gray-900 mb-3">AI Features</h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex items-center text-gray-700">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                Computer Vision Analysis
+                            </div>
+                            <div class="flex items-center text-gray-700">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                Smart Room Detection
+                            </div>
+                            <div class="flex items-center text-gray-700">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                Market-Based Descriptions
+                            </div>
+                            <div class="flex items-center text-gray-700">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                MLS Optimization
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Generated Listing Display -->
+            <div id="mainGeneratedResult" class="hidden mt-8">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-semibold text-gray-900">Generated Property Listing</h3>
+                        <div class="flex space-x-3">
+                            <button onclick="editListing()" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition text-sm">
+                                <i class="fas fa-edit mr-2"></i>Edit
+                            </button>
+                            <button onclick="exportListing()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm">
+                                <i class="fas fa-download mr-2"></i>Export
+                            </button>
+                            <button onclick="showDistributionModal(generatedProperty)" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition text-sm">
+                                <i class="fas fa-share mr-2"></i>Distribute
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="mainListingContent">
+                        <!-- Generated listing content will be displayed here -->
+                    </div>
+                    
+                    <div class="mt-6 flex justify-between">
+                        <button onclick="startOver()" class="text-gray-600 hover:text-gray-800">
+                            <i class="fas fa-plus mr-2"></i>Generate Another Listing
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -531,9 +663,9 @@
                         dashboard.style.display = 'block';
                         console.log('Dashboard shown');
                         
-                        // Generate property listings
-                        generatePropertyListings();
-                        console.log('Property listings generated');
+                        // Initialize the main interface
+                        initializeMainInterface();
+                        console.log('Main interface initialized');
                     } else {
                         console.error('Dashboard element not found');
                     }
@@ -1487,6 +1619,351 @@
             document.getElementById('uploadedPhotos').innerHTML = '';
             document.getElementById('generateBtn').disabled = true;
             document.getElementById('generateBtn').className = 'px-6 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed';
+        }
+
+        // ===== NEW MAIN INTERFACE FUNCTIONS =====
+        
+        let mainUploadedFiles = [];
+        let mainGeneratedProperty = null;
+        let recentListings = [];
+        
+        // Initialize main interface
+        function initializeMainInterface() {
+            setupDragAndDrop();
+            updateRecentListings();
+        }
+        
+        // Setup drag and drop functionality
+        function setupDragAndDrop() {
+            const uploadArea = document.getElementById('mainUploadArea');
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, unhighlight, false);
+            });
+            
+            uploadArea.addEventListener('drop', handleDrop, false);
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            function highlight() {
+                uploadArea.classList.add('border-primary', 'bg-blue-50');
+            }
+            
+            function unhighlight() {
+                uploadArea.classList.remove('border-primary', 'bg-blue-50');
+            }
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                handleMainPhotoUpload({ target: { files: files } });
+            }
+        }
+        
+        // Handle main photo upload
+        function handleMainPhotoUpload(event) {
+            const files = Array.from(event.target.files);
+            mainUploadedFiles = files;
+            
+            if (files.length > 0) {
+                displayMainUploadedPhotos(files);
+                document.getElementById('mainUploadedPhotos').classList.remove('hidden');
+                document.getElementById('mainUploadArea').classList.add('hidden');
+            }
+        }
+        
+        // Display uploaded photos in main interface
+        function displayMainUploadedPhotos(files) {
+            const photoGrid = document.getElementById('mainPhotoGrid');
+            photoGrid.innerHTML = '';
+            
+            files.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const photoDiv = document.createElement('div');
+                    photoDiv.className = 'relative group';
+                    photoDiv.innerHTML = `
+                        <img src="${e.target.result}" alt="Upload ${index + 1}" class="w-full h-32 object-cover rounded-lg border">
+                        <button onclick="removeMainPhoto(${index})" class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <div class="absolute bottom-2 left-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs">
+                            ${index + 1} of ${files.length}
+                        </div>
+                    `;
+                    photoGrid.appendChild(photoDiv);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        // Remove photo from main upload
+        function removeMainPhoto(index) {
+            mainUploadedFiles.splice(index, 1);
+            if (mainUploadedFiles.length > 0) {
+                displayMainUploadedPhotos(mainUploadedFiles);
+            } else {
+                clearMainPhotos();
+            }
+        }
+        
+        // Clear all main photos
+        function clearMainPhotos() {
+            mainUploadedFiles = [];
+            document.getElementById('mainUploadedPhotos').classList.add('hidden');
+            document.getElementById('mainUploadArea').classList.remove('hidden');
+            document.getElementById('mainPhotoUpload').value = '';
+        }
+        
+        // Start main generation process
+        async function startMainGeneration() {
+            if (mainUploadedFiles.length === 0) {
+                alert('Please upload photos first');
+                return;
+            }
+            
+            // Hide upload section and show progress
+            document.getElementById('mainUploadedPhotos').classList.add('hidden');
+            document.getElementById('mainGenerationProgress').classList.remove('hidden');
+            
+            // Start generation process
+            await runMainGenerationProcess();
+        }
+        
+        // Main generation process with enhanced steps
+        async function runMainGenerationProcess() {
+            const steps = [
+                { id: 'step1', text: 'Processing uploaded images...', percent: 25 },
+                { id: 'step2', text: 'Detecting rooms and features...', percent: 50 },
+                { id: 'step3', text: 'Analyzing architectural style...', percent: 75 },
+                { id: 'step4', text: 'Generating description...', percent: 100 }
+            ];
+            
+            const progressBar = document.getElementById('mainProgressBar');
+            const progressPercent = document.getElementById('mainProgressPercent');
+            const progressText = document.getElementById('mainProgressText');
+            
+            for (let i = 0; i < steps.length; i++) {
+                const step = steps[i];
+                
+                // Update progress
+                progressBar.style.width = step.percent + '%';
+                progressPercent.textContent = step.percent + '%';
+                progressText.textContent = step.text;
+                
+                // Update step indicator
+                const stepElement = document.getElementById(step.id);
+                stepElement.innerHTML = `<i class="fas fa-check text-green-500 text-xs mr-2"></i>${step.text.replace('...', '')}`;
+                stepElement.classList.remove('text-gray-500');
+                stepElement.classList.add('text-green-600');
+                
+                // Wait for step completion
+                await new Promise(resolve => setTimeout(resolve, 1500));
+            }
+            
+            // Generate the property data
+            const propertyData = await generateAdvancedProperty();
+            mainGeneratedProperty = propertyData;
+            
+            // Show results
+            setTimeout(() => {
+                showMainGenerationResults(propertyData);
+            }, 1000);
+        }
+        
+        // Show generation results in main interface
+        function showMainGenerationResults(property) {
+            // Hide progress
+            document.getElementById('mainGenerationProgress').classList.add('hidden');
+            
+            // Show results
+            document.getElementById('mainGeneratedResult').classList.remove('hidden');
+            
+            // Display the listing content
+            const content = document.getElementById('mainListingContent');
+            content.innerHTML = generateListingHTML(property);
+            
+            // Add to recent listings
+            addToRecentListings(property);
+            
+            // Scroll to results
+            document.getElementById('mainGeneratedResult').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Generate HTML for listing display
+        function generateListingHTML(property) {
+            const formatPrice = (price) => {
+                if (typeof price === 'string') return price;
+                return `$${price.toLocaleString()}`;
+            };
+            
+            return `
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <img src="${property.image}" alt="${property.address}" class="w-full h-64 object-cover rounded-lg">
+                        <div class="mt-3 flex items-center justify-between text-sm">
+                            <span class="text-gray-500"><i class="fas fa-robot mr-1"></i>AI Generated</span>
+                            <span class="text-green-600"><i class="fas fa-check-circle mr-1"></i>MLS Ready</span>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="text-2xl font-bold text-gray-900">${property.address}</h4>
+                            <p class="text-gray-600">${property.city}</p>
+                        </div>
+                        <div class="text-3xl font-bold text-primary">${formatPrice(property.price)}</div>
+                        <div class="flex space-x-6 text-gray-600">
+                            <span><i class="fas fa-bed mr-2"></i>${property.beds} beds</span>
+                            <span><i class="fas fa-bath mr-2"></i>${property.baths} baths</span>
+                            <span><i class="fas fa-ruler-combined mr-2"></i>${property.sqft} sqft</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div><strong>Property Type:</strong> ${property.type}</div>
+                            <div><strong>Year Built:</strong> ${property.yearBuilt}</div>
+                            <div><strong>Price/sq ft:</strong> $${property.pricePerSqft}</div>
+                            <div><strong>Condition:</strong> ${property.condition?.overall || 'Excellent'}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h5 class="font-semibold mb-3 text-lg">AI-Generated Description</h5>
+                    <div class="bg-gray-50 p-6 rounded-lg">
+                        <p class="text-gray-800 leading-relaxed text-lg">${property.description}</p>
+                    </div>
+                </div>
+
+                ${property.aiAnalysis && property.aiAnalysis.length > 0 ? `
+                <div class="mb-6">
+                    <h5 class="font-semibold mb-3">AI Photo Analysis</h5>
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <ul class="space-y-2 text-sm">
+                            ${property.aiAnalysis.map(insight => `<li class="flex items-start"><i class="fas fa-check text-blue-500 mr-2 mt-1"></i>${insight}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+                ` : ''}
+
+                ${property.features && property.features.length > 0 ? `
+                <div class="mb-6">
+                    <h5 class="font-semibold mb-3">Key Features</h5>
+                    <div class="flex flex-wrap gap-2">
+                        ${property.features.map(feature => `<span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">${feature}</span>`).join('')}
+                    </div>
+                </div>
+                ` : ''}
+            `;
+        }
+        
+        // Add to recent listings
+        function addToRecentListings(property) {
+            recentListings.unshift(property);
+            if (recentListings.length > 5) {
+                recentListings = recentListings.slice(0, 5);
+            }
+            updateRecentListings();
+        }
+        
+        // Update recent listings display
+        function updateRecentListings() {
+            const container = document.getElementById('recentListings');
+            if (recentListings.length === 0) {
+                container.innerHTML = `
+                    <div class="text-sm text-gray-500 text-center py-4">
+                        No listings generated yet. Upload photos to get started!
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = recentListings.map(listing => `
+                <div class="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                    <img src="${listing.image}" alt="${listing.address}" class="w-12 h-12 object-cover rounded">
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-gray-900 truncate">${listing.address}</div>
+                        <div class="text-xs text-gray-500">${listing.city}</div>
+                    </div>
+                    <div class="text-sm font-semibold text-primary">${typeof listing.price === 'string' ? listing.price : '$' + listing.price.toLocaleString()}</div>
+                </div>
+            `).join('');
+        }
+        
+        // Start over function
+        function startOver() {
+            // Reset all states
+            document.getElementById('mainGeneratedResult').classList.add('hidden');
+            document.getElementById('mainGenerationProgress').classList.add('hidden');
+            document.getElementById('mainUploadArea').classList.remove('hidden');
+            
+            // Clear photos
+            clearMainPhotos();
+            
+            // Reset progress indicators
+            const steps = ['step1', 'step2', 'step3', 'step4'];
+            steps.forEach(stepId => {
+                const stepElement = document.getElementById(stepId);
+                stepElement.innerHTML = stepElement.innerHTML.replace('fa-check text-green-500', 'fa-circle').replace('text-green-600', 'text-gray-500');
+            });
+            
+            // Reset progress bar
+            document.getElementById('mainProgressBar').style.width = '0%';
+            document.getElementById('mainProgressPercent').textContent = '0%';
+            
+            // Scroll back to top
+            document.getElementById('mainUploadArea').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Export listing function
+        function exportListing() {
+            if (!mainGeneratedProperty) return;
+            
+            const listingText = `
+PROPERTY LISTING - AI GENERATED
+
+Address: ${mainGeneratedProperty.address}
+City: ${mainGeneratedProperty.city}
+Price: ${typeof mainGeneratedProperty.price === 'string' ? mainGeneratedProperty.price : '$' + mainGeneratedProperty.price.toLocaleString()}
+Type: ${mainGeneratedProperty.type}
+Bedrooms: ${mainGeneratedProperty.beds}
+Bathrooms: ${mainGeneratedProperty.baths}
+Square Feet: ${mainGeneratedProperty.sqft}
+Year Built: ${mainGeneratedProperty.yearBuilt}
+
+DESCRIPTION:
+${mainGeneratedProperty.description}
+
+FEATURES:
+${mainGeneratedProperty.features ? mainGeneratedProperty.features.map(f => '• ' + f).join('\n') : 'None specified'}
+
+AI ANALYSIS:
+${mainGeneratedProperty.aiAnalysis ? mainGeneratedProperty.aiAnalysis.map(a => '• ' + a).join('\n') : 'None available'}
+
+Generated by RealtyHub AI Listing Generator
+            `.trim();
+            
+            const blob = new Blob([listingText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `listing-${mainGeneratedProperty.address.replace(/\s+/g, '-').toLowerCase()}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        // Edit listing function
+        function editListing() {
+            alert('Edit functionality would open a form to modify the generated listing. This is a demo feature.');
         }
 
         // Check if user is already logged in
