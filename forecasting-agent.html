@@ -678,7 +678,8 @@
 
                 if (response.ok) {
                     const result = await response.json();
-                    console.log('TimeGPT response:', JSON.stringify(result, null, 2).substring(0, 500) + '...');
+                    console.log('Full TimeGPT response keys:', Object.keys(result));
+                    console.log('TimeGPT response:', JSON.stringify(result, null, 2));
                     return processForecastResult(result, data);
                 } else {
                     const errorText = await response.text();
@@ -701,44 +702,64 @@
 
         // Process TimeGPT forecast result
         function processForecastResult(result, historicalData) {
-            console.log('Processing TimeGPT result:', Object.keys(result));
+            console.log('Processing TimeGPT result keys:', Object.keys(result));
             
             // TimeGPT returns different formats, try to handle them
             let forecastData = [];
             
-            if (result.data && Array.isArray(result.data)) {
-                // Format 1: {data: [{ds: "date", TimeGPT: value}, ...]}
-                forecastData = result.data.map(item => ({
-                    date: item.ds.split('T')[0],
-                    value: parseFloat(item.TimeGPT),
-                    isForecast: true
-                }));
-            } else if (result.forecast && Array.isArray(result.forecast)) {
-                // Format 2: {forecast: [value1, value2, ...]}
-                const lastDate = new Date(historicalData[historicalData.length - 1].date);
-                forecastData = result.forecast.map((value, index) => {
-                    const futureDate = new Date(lastDate);
-                    futureDate.setMonth(futureDate.getMonth() + (index + 1));
-                    return {
-                        date: futureDate.toISOString().split('T')[0],
-                        value: parseFloat(value),
-                        isForecast: true
-                    };
-                });
-            } else if (Array.isArray(result)) {
-                // Format 3: [{ds: "date", TimeGPT: value}, ...]
-                forecastData = result.map(item => ({
-                    date: item.ds.split('T')[0],
-                    value: parseFloat(item.TimeGPT),
-                    isForecast: true
-                }));
-            } else {
-                console.log('Unknown TimeGPT response format:', result);
-                throw new Error('Invalid TimeGPT response format - check console for details');
+            // Check for common TimeGPT response fields
+            const possibleDataFields = ['data', 'forecast', 'predictions', 'values', 'TimegGPT', 'timegpt'];
+            let dataSource = null;
+            
+            // Find the data field
+            for (const field of possibleDataFields) {
+                if (result[field] !== undefined) {
+                    console.log('Found data in field:', field);
+                    dataSource = result[field];
+                    break;
+                }
             }
             
+            // Also check if result itself is the data array
+            if (!dataSource && Array.isArray(result)) {
+                dataSource = result;
+                console.log('Result is direct array');
+            }
+            
+            if (dataSource && Array.isArray(dataSource)) {
+                // Handle array of forecast objects
+                if (dataSource[0] && typeof dataSource[0] === 'object' && dataSource[0].ds) {
+                    // Format: [{ds: "date", TimeGPT: value}, ...]
+                    forecastData = dataSource.map(item => ({
+                        date: item.ds.split('T')[0],
+                        value: parseFloat(item.TimeGPT || item.timegpt || item.value),
+                        isForecast: true
+                    }));
+                } else if (dataSource[0] && typeof dataSource[0] === 'number') {
+                    // Format: [value1, value2, ...]
+                    const lastDate = new Date(historicalData[historicalData.length - 1].date);
+                    forecastData = dataSource.map((value, index) => {
+                        const futureDate = new Date(lastDate);
+                        futureDate.setMonth(futureDate.getMonth() + (index + 1));
+                        return {
+                            date: futureDate.toISOString().split('T')[0],
+                            value: parseFloat(value),
+                            isForecast: true
+                        };
+                    });
+                }
+            }
+            
+            // If still no data found, log all fields for debugging
             if (forecastData.length === 0) {
-                throw new Error('No forecast data found in TimeGPT response');
+                console.log('No forecast data found. Available fields:');
+                for (const [key, value] of Object.entries(result)) {
+                    console.log(`  ${key}:`, typeof value, Array.isArray(value) ? `(array of ${value.length})` : '');
+                    if (Array.isArray(value) && value.length > 0) {
+                        console.log(`    Sample:`, value[0]);
+                    }
+                }
+                throw new Error('No forecast data found in TimeGPT response - check console for available fields');
             }
             
             console.log('Processed forecast:', forecastData.length, 'points');
