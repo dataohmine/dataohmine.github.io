@@ -491,12 +491,22 @@
                 const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkRlbW8gVXNlciIsImlhdCI6MTUxNjIzOTAyMn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
                 localStorage.setItem('realtyhub_token', token);
                 
-                // Show dashboard
-                document.querySelector('.grid.lg\\:grid-cols-2.gap-8.mb-8').style.display = 'none';
-                document.getElementById('dashboard').classList.remove('hidden');
+                // Show dashboard - use a more reliable selector
+                const loginSection = document.querySelector('.grid.lg\\:grid-cols-2.gap-8.mb-8') || 
+                                    document.querySelector('.grid[class*="lg:grid-cols-2"]');
+                if (loginSection) {
+                    loginSection.style.display = 'none';
+                }
                 
-                // Generate property listings
-                generatePropertyListings();
+                const dashboard = document.getElementById('dashboard');
+                if (dashboard) {
+                    dashboard.classList.remove('hidden');
+                    
+                    // Generate property listings
+                    generatePropertyListings();
+                } else {
+                    console.error('Dashboard element not found');
+                }
             } else {
                 alert('Please enter valid credentials');
             }
@@ -505,8 +515,18 @@
         // Logout functionality
         function logout() {
             localStorage.removeItem('realtyhub_token');
-            document.querySelector('.grid.lg\\:grid-cols-2.gap-8.mb-8').style.display = 'grid';
-            document.getElementById('dashboard').classList.add('hidden');
+            
+            // Show login section - use more reliable selector
+            const loginSection = document.querySelector('.grid.lg\\:grid-cols-2.gap-8.mb-8') || 
+                                document.querySelector('.grid[class*="lg:grid-cols-2"]');
+            if (loginSection) {
+                loginSection.style.display = 'grid';
+            }
+            
+            const dashboard = document.getElementById('dashboard');
+            if (dashboard) {
+                dashboard.classList.add('hidden');
+            }
         }
 
         // Generate property listings
