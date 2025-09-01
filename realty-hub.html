@@ -23,6 +23,14 @@
             }
         }
     </script>
+    <style>
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
     <!-- Navigation -->
@@ -282,73 +290,191 @@
     </div>
 
     <script>
-        // Sample property data
+        // Enhanced property data with realistic listings
         const sampleProperties = [
             {
                 id: 1,
-                address: "123 Oak Street",
+                address: "2847 Mulholland Drive",
                 city: "Beverly Hills, CA",
-                price: "$1,250,000",
-                type: "Single Family",
-                beds: 4,
-                baths: 3,
-                sqft: "2,450",
-                image: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+                price: "$3,850,000",
+                type: "Luxury Estate",
+                beds: 6,
+                baths: 5,
+                sqft: "4,850",
+                yearBuilt: 2019,
+                lotSize: "0.82 acres",
+                parking: "3-car garage",
+                description: "Stunning contemporary estate with panoramic city views. Features include chef's kitchen with marble countertops, infinity pool, home theater, and wine cellar. Premium finishes throughout.",
+                status: "For Sale",
+                daysOnMarket: 14,
+                agent: "Sarah Johnson",
+                image: "https://images.unsplash.com/photo-1613977257363-707ba9348227?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                images: [
+                    "https://images.unsplash.com/photo-1613977257363-707ba9348227?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                ]
             },
             {
                 id: 2,
-                address: "456 Pine Avenue",
+                address: "1256 Ocean Avenue",
                 city: "Santa Monica, CA",
-                price: "$850,000",
-                type: "Condo",
-                beds: 2,
-                baths: 2,
-                sqft: "1,200",
-                image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+                price: "$2,200,000",
+                type: "Modern Condo",
+                beds: 3,
+                baths: 2.5,
+                sqft: "1,950",
+                yearBuilt: 2021,
+                lotSize: "N/A",
+                parking: "2 spaces",
+                description: "Oceanfront luxury condo with floor-to-ceiling windows and private balcony. Building amenities include rooftop pool, fitness center, and 24/7 concierge service.",
+                status: "For Sale",
+                daysOnMarket: 7,
+                agent: "Mike Chen",
+                image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                images: [
+                    "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                ]
             },
             {
                 id: 3,
-                address: "789 Maple Drive",
-                city: "Pasadena, CA",
-                price: "$675,000",
-                type: "Townhouse",
-                beds: 3,
-                baths: 2.5,
-                sqft: "1,800",
-                image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+                address: "5642 Sunset Boulevard",
+                city: "West Hollywood, CA",
+                price: "$1,475,000",
+                type: "Modern Townhouse",
+                beds: 4,
+                baths: 3,
+                sqft: "2,250",
+                yearBuilt: 2020,
+                lotSize: "0.15 acres",
+                parking: "2-car garage",
+                description: "Contemporary townhouse in the heart of West Hollywood. Open-concept design with smart home technology, rooftop terrace, and gourmet kitchen. Walking distance to shopping and dining.",
+                status: "For Sale",
+                daysOnMarket: 21,
+                agent: "Lisa Rodriguez",
+                image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                images: [
+                    "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1600607687644-aac4c3eac7f4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                ]
             },
             {
                 id: 4,
-                address: "321 Elm Street",
-                city: "West Hollywood, CA",
-                price: "$2,100,000",
-                type: "Single Family",
-                beds: 5,
-                baths: 4,
-                sqft: "3,200",
-                image: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+                address: "891 Highland Avenue",
+                city: "Pasadena, CA",
+                price: "$925,000",
+                type: "Craftsman Home",
+                beds: 3,
+                baths: 2,
+                sqft: "1,850",
+                yearBuilt: 1925,
+                lotSize: "0.25 acres",
+                parking: "Detached garage",
+                description: "Beautifully restored 1925 Craftsman with original hardwood floors and built-ins. Updated kitchen and bathrooms while maintaining period charm. Large backyard with mature trees.",
+                status: "Pending",
+                daysOnMarket: 3,
+                agent: "David Park",
+                image: "https://images.unsplash.com/photo-1518780664697-55e3ad937233?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                images: [
+                    "https://images.unsplash.com/photo-1518780664697-55e3ad937233?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                ]
             },
             {
                 id: 5,
-                address: "654 Cedar Lane",
+                address: "3421 Manhattan Beach Boulevard",
                 city: "Manhattan Beach, CA",
-                price: "$1,850,000",
-                type: "Single Family",
-                beds: 4,
-                baths: 3.5,
-                sqft: "2,800",
-                image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+                price: "$4,200,000",
+                type: "Beachfront Villa",
+                beds: 5,
+                baths: 4.5,
+                sqft: "3,800",
+                yearBuilt: 2018,
+                lotSize: "0.35 acres",
+                parking: "3-car garage + guest parking",
+                description: "Spectacular beachfront villa with unobstructed ocean views. Features include elevator, wine cellar, home gym, and direct beach access. Custom design throughout with premium materials.",
+                status: "For Sale",
+                daysOnMarket: 42,
+                agent: "Amanda Torres",
+                image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                images: [
+                    "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                ]
             },
             {
                 id: 6,
-                address: "987 Birch Court",
-                city: "Culver City, CA",
-                price: "$545,000",
-                type: "Condo",
-                beds: 1,
-                baths: 1,
-                sqft: "750",
-                image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+                address: "789 Arts District Lofts",
+                city: "Downtown LA, CA",
+                price: "$685,000",
+                type: "Industrial Loft",
+                beds: 2,
+                baths: 2,
+                sqft: "1,400",
+                yearBuilt: 2017,
+                lotSize: "N/A",
+                parking: "1 space + storage",
+                description: "Converted warehouse loft in trendy Arts District. Exposed brick, concrete floors, and 14-foot ceilings. Modern fixtures, stainless steel appliances, and walk-in closets.",
+                status: "For Sale",
+                daysOnMarket: 18,
+                agent: "Carlos Mendez",
+                image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                images: [
+                    "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1600607687644-aac4c3eac7f4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                ]
+            },
+            {
+                id: 7,
+                address: "1847 Laurel Canyon Boulevard",
+                city: "Hollywood Hills, CA",
+                price: "$1,850,000",
+                type: "Mid-Century Modern",
+                beds: 4,
+                baths: 3,
+                sqft: "2,650",
+                yearBuilt: 1962,
+                lotSize: "0.45 acres",
+                parking: "2-car carport",
+                description: "Iconic mid-century modern home with walls of glass and canyon views. Recently renovated while preserving original Neutra-inspired architecture. Pool, spa, and entertaining deck.",
+                status: "For Sale",
+                daysOnMarket: 9,
+                agent: "Jennifer Lee",
+                image: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                images: [
+                    "https://images.unsplash.com/photo-1568605114967-8130f3a36994?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                ]
+            },
+            {
+                id: 8,
+                address: "2156 Venice Beach Walk",
+                city: "Venice, CA",
+                price: "$1,350,000",
+                type: "Beach House",
+                beds: 3,
+                baths: 2.5,
+                sqft: "1,750",
+                yearBuilt: 2019,
+                lotSize: "0.12 acres",
+                parking: "1-car garage",
+                description: "Contemporary beach house steps from the sand. Open floor plan with vaulted ceilings, skylights, and ocean breezes. Rooftop deck with 360-degree views of beach and city.",
+                status: "For Sale",
+                daysOnMarket: 5,
+                agent: "Ryan Mitchell",
+                image: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                images: [
+                    "https://images.unsplash.com/photo-1570129477492-45c003edd2be?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1600607687644-aac4c3eac7f4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                ]
             }
         ];
 
@@ -387,30 +513,168 @@
 
             sampleProperties.forEach(property => {
                 const propertyCard = document.createElement('div');
-                propertyCard.className = 'bg-gray-50 rounded-lg overflow-hidden border border-gray-200 hover:shadow-md transition';
+                propertyCard.className = 'bg-gray-50 rounded-lg overflow-hidden border border-gray-200 hover:shadow-md transition cursor-pointer';
+                propertyCard.onclick = () => showPropertyDetails(property);
+                
+                const statusColor = property.status === 'For Sale' ? 'bg-green-100 text-green-800' : 
+                                   property.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 
+                                   'bg-red-100 text-red-800';
+                
                 propertyCard.innerHTML = `
-                    <img src="${property.image}" alt="${property.address}" class="w-full h-48 object-cover">
+                    <div class="relative">
+                        <img src="${property.image}" alt="${property.address}" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 ${statusColor} px-2 py-1 rounded-full text-xs font-medium">
+                            ${property.status}
+                        </div>
+                        <div class="absolute top-2 right-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs">
+                            ${property.daysOnMarket} days
+                        </div>
+                    </div>
                     <div class="p-4">
                         <div class="flex justify-between items-start mb-2">
-                            <h4 class="font-semibold text-gray-900">${property.address}</h4>
+                            <h4 class="font-semibold text-gray-900 text-sm leading-tight">${property.address}</h4>
                             <span class="text-lg font-bold text-primary">${property.price}</span>
                         </div>
-                        <p class="text-sm text-gray-600 mb-3">${property.city}</p>
-                        <div class="flex justify-between text-sm text-gray-500 mb-3">
+                        <p class="text-sm text-gray-600 mb-2">${property.city}</p>
+                        <p class="text-xs text-gray-500 mb-3 line-clamp-2">${property.description}</p>
+                        <div class="flex justify-between text-xs text-gray-500 mb-3">
                             <span><i class="fas fa-bed mr-1"></i>${property.beds} beds</span>
                             <span><i class="fas fa-bath mr-1"></i>${property.baths} baths</span>
                             <span><i class="fas fa-ruler-combined mr-1"></i>${property.sqft} sqft</span>
                         </div>
-                        <div class="flex justify-between items-center">
+                        <div class="flex justify-between items-center border-t pt-3">
+                            <div class="flex items-center">
+                                <div class="w-6 h-6 bg-primary rounded-full flex items-center justify-center mr-2">
+                                    <i class="fas fa-user text-white text-xs"></i>
+                                </div>
+                                <span class="text-xs text-gray-600">${property.agent}</span>
+                            </div>
                             <span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full">${property.type}</span>
-                            <button class="text-primary hover:text-secondary text-sm font-medium">
-                                View Details <i class="fas fa-arrow-right ml-1"></i>
-                            </button>
                         </div>
                     </div>
                 `;
                 propertyGrid.appendChild(propertyCard);
             });
+        }
+
+        // Show property details modal
+        function showPropertyDetails(property) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50';
+            modal.onclick = (e) => {
+                if (e.target === modal) {
+                    document.body.removeChild(modal);
+                }
+            };
+            
+            const statusColor = property.status === 'For Sale' ? 'text-green-600' : 
+                               property.status === 'Pending' ? 'text-yellow-600' : 
+                               'text-red-600';
+            
+            modal.innerHTML = `
+                <div class="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                    <div class="relative">
+                        <img src="${property.image}" alt="${property.address}" class="w-full h-64 object-cover">
+                        <button onclick="document.body.removeChild(this.closest('.fixed'))" class="absolute top-4 right-4 bg-black bg-opacity-50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-opacity-70">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h2 class="text-2xl font-bold text-gray-900">${property.address}</h2>
+                                <p class="text-gray-600">${property.city}</p>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-2xl font-bold text-primary">${property.price}</div>
+                                <div class="${statusColor} font-semibold">${property.status}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <h3 class="text-lg font-semibold mb-3">Property Details</h3>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Property Type:</span>
+                                        <span class="font-medium">${property.type}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Bedrooms:</span>
+                                        <span class="font-medium">${property.beds}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Bathrooms:</span>
+                                        <span class="font-medium">${property.baths}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Square Feet:</span>
+                                        <span class="font-medium">${property.sqft}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Year Built:</span>
+                                        <span class="font-medium">${property.yearBuilt}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Lot Size:</span>
+                                        <span class="font-medium">${property.lotSize}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Parking:</span>
+                                        <span class="font-medium">${property.parking}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 class="text-lg font-semibold mb-3">Listing Information</h3>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Days on Market:</span>
+                                        <span class="font-medium">${property.daysOnMarket} days</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Listing Agent:</span>
+                                        <span class="font-medium">${property.agent}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Price per Sq Ft:</span>
+                                        <span class="font-medium">$${Math.round(parseInt(property.price.replace(/[$,]/g, '')) / parseInt(property.sqft.replace(',', '')))}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <button class="w-full bg-primary text-white py-2 px-4 rounded-lg hover:bg-secondary transition mb-2">
+                                        <i class="fas fa-heart mr-2"></i>Save Property
+                                    </button>
+                                    <button class="w-full border border-primary text-primary py-2 px-4 rounded-lg hover:bg-primary hover:text-white transition">
+                                        <i class="fas fa-envelope mr-2"></i>Contact Agent
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold mb-3">Description</h3>
+                            <p class="text-gray-700 leading-relaxed">${property.description}</p>
+                        </div>
+                        
+                        ${property.images && property.images.length > 1 ? `
+                        <div>
+                            <h3 class="text-lg font-semibold mb-3">Additional Photos</h3>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                ${property.images.slice(1).map(img => `
+                                    <img src="${img}" alt="${property.address}" class="w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-75 transition">
+                                `).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
         }
 
         // Check if user is already logged in
