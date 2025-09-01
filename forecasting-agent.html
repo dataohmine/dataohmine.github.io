@@ -274,11 +274,20 @@
         // FRED Data Integration
         async function loadFredData() {
             const series = document.getElementById('fredSeries').value;
-            const apiKey = localStorage.getItem('fred_api_key');
+            let apiKey = localStorage.getItem('fred_api_key');
+            
+            // If API key not found, try loading from env file
+            if (!apiKey) {
+                try {
+                    await loadKeysFromEnvFile();
+                    apiKey = localStorage.getItem('fred_api_key');
+                } catch (error) {
+                    console.log('Could not load API keys:', error.message);
+                }
+            }
             
             if (!apiKey) {
-                addChatMessage('Please configure your FRED API key in settings first.', 'ai');
-                toggleSettings();
+                addChatMessage('⚠️ FRED API key not found in git_api.env file. Please check the environment configuration.', 'ai');
                 return;
             }
 
@@ -396,9 +405,20 @@
 
         // TimeGPT Forecasting
         async function generateForecast(data, periods = 12, context = '') {
-            const apiKey = localStorage.getItem('timegpt_api_key');
+            let apiKey = localStorage.getItem('timegpt_api_key');
+            
+            // If API key not found, try loading from env file
+            if (!apiKey) {
+                try {
+                    await loadKeysFromEnvFile();
+                    apiKey = localStorage.getItem('timegpt_api_key');
+                } catch (error) {
+                    console.log('Could not load TimeGPT API key:', error.message);
+                }
+            }
             
             if (!apiKey) {
+                addChatMessage('📊 Using fallback forecasting (TimeGPT API key not found)', 'ai');
                 return generateFallbackForecast(data, periods, context);
             }
 
@@ -636,7 +656,17 @@
         }
 
         async function explainForecast(subject, forecast, historicalData) {
-            const openaiKey = localStorage.getItem('openai_api_key');
+            let openaiKey = localStorage.getItem('openai_api_key');
+            
+            // If API key not found, try loading from env file
+            if (!openaiKey) {
+                try {
+                    await loadKeysFromEnvFile();
+                    openaiKey = localStorage.getItem('openai_api_key');
+                } catch (error) {
+                    console.log('Could not load OpenAI API key:', error.message);
+                }
+            }
             
             if (!openaiKey) {
                 return generateSimpleExplanation(subject, forecast, historicalData);
