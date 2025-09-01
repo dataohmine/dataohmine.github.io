@@ -7,6 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script>
         tailwind.config = {
             theme: {
@@ -231,6 +233,76 @@
                 </div>
             </div>
         </div>
+
+        <!-- Interactive Risk Map -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-xl font-semibold text-gray-900 mb-6">Interactive Risk Map - Ventura County</h2>
+            <div id="map" style="height: 400px; width: 100%;" class="rounded-lg border border-gray-200"></div>
+            <div class="mt-4 flex flex-wrap gap-4">
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-red-500 rounded-full mr-2"></div>
+                    <span class="text-sm text-gray-600">High Risk Areas</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-orange-500 rounded-full mr-2"></div>
+                    <span class="text-sm text-gray-600">Moderate Risk</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-green-500 rounded-full mr-2"></div>
+                    <span class="text-sm text-gray-600">Low Risk</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Chat Assistant -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <div class="flex items-center mb-6">
+                <i class="fas fa-robot text-primary text-2xl mr-3"></i>
+                <h2 class="text-xl font-semibold text-gray-900">AI Fire Safety Assistant</h2>
+            </div>
+            
+            <div id="chatHistory" class="bg-gray-50 rounded-lg p-4 h-64 overflow-y-auto mb-4 space-y-2">
+                <div class="flex items-start space-x-2">
+                    <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-robot text-white text-sm"></i>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg shadow-sm">
+                        <p class="text-sm text-gray-800">Hello! I'm your AI Fire Safety Assistant. I can help you understand current wildfire risks, provide safety recommendations, and answer questions about fire prevention. How can I help you today?</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex space-x-2">
+                <input 
+                    type="text" 
+                    id="chatInput" 
+                    placeholder="Ask about fire safety, current risks, or prevention tips..."
+                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    onkeypress="handleChatKeyPress(event)"
+                >
+                <button 
+                    onclick="sendChatMessage()" 
+                    class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-secondary transition duration-300"
+                >
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+            
+            <div class="mt-4">
+                <p class="text-xs text-gray-500 mb-2">Quick questions:</p>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="askQuickQuestion('What should I do if I see smoke?')" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-full transition">
+                        What should I do if I see smoke?
+                    </button>
+                    <button onclick="askQuickQuestion('How can I protect my home?')" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-full transition">
+                        How can I protect my home?
+                    </button>
+                    <button onclick="askQuickQuestion('Current evacuation routes?')" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-full transition">
+                        Current evacuation routes?
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -429,11 +501,131 @@
             }, 1000);
         }
 
+        // Initialize Map
+        function initializeMap() {
+            // Initialize the map centered on Ventura County
+            const map = L.map('map').setView([34.2804, -119.2945], 10);
+            
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            // Add risk zone markers
+            const riskZones = [
+                { lat: 34.2694, lng: -118.7815, risk: 'high', name: 'Simi Valley', description: 'Extreme fire weather conditions' },
+                { lat: 34.1808, lng: -118.8398, risk: 'moderate', name: 'Thousand Oaks', description: 'Elevated conditions due to Santa Ana winds' },
+                { lat: 34.1975, lng: -119.1771, risk: 'low', name: 'Oxnard', description: 'Coastal marine layer providing protection' },
+                { lat: 34.3631, lng: -119.0877, risk: 'high', name: 'Ojai', description: 'Dry mountain conditions' },
+                { lat: 34.2804, lng: -119.2945, risk: 'moderate', name: 'Ventura', description: 'Mixed coastal and inland conditions' }
+            ];
+            
+            riskZones.forEach(zone => {
+                const color = zone.risk === 'high' ? 'red' : zone.risk === 'moderate' ? 'orange' : 'green';
+                const marker = L.circleMarker([zone.lat, zone.lng], {
+                    color: color,
+                    fillColor: color,
+                    fillOpacity: 0.6,
+                    radius: 8
+                }).addTo(map);
+                
+                marker.bindPopup(`
+                    <div class="p-2">
+                        <h3 class="font-semibold text-gray-900">${zone.name}</h3>
+                        <p class="text-sm text-gray-600 capitalize">${zone.risk} Risk</p>
+                        <p class="text-xs text-gray-500">${zone.description}</p>
+                    </div>
+                `);
+            });
+        }
+
+        // Chat functionality
+        let chatHistory = [];
+
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            addChatMessage(message, 'user');
+            input.value = '';
+
+            // Simulate AI response
+            setTimeout(() => {
+                const response = generateAIResponse(message);
+                addChatMessage(response, 'ai');
+            }, 1000);
+        }
+
+        function askQuickQuestion(question) {
+            document.getElementById('chatInput').value = question;
+            sendChatMessage();
+        }
+
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+
+        function addChatMessage(message, sender) {
+            const chatHistory = document.getElementById('chatHistory');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'flex items-start space-x-2';
+
+            if (sender === 'ai') {
+                messageDiv.innerHTML = `
+                    <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-robot text-white text-sm"></i>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg shadow-sm">
+                        <p class="text-sm text-gray-800">${message}</p>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center flex-shrink-0 ml-auto">
+                        <i class="fas fa-user text-white text-sm"></i>
+                    </div>
+                    <div class="bg-primary text-white p-3 rounded-lg shadow-sm ml-auto">
+                        <p class="text-sm">${message}</p>
+                    </div>
+                `;
+                messageDiv.className = 'flex items-start space-x-2 justify-end';
+            }
+
+            chatHistory.appendChild(messageDiv);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        function generateAIResponse(userMessage) {
+            const message = userMessage.toLowerCase();
+            
+            if (message.includes('smoke') || message.includes('fire')) {
+                return "If you see smoke or fire: 1) Call 911 immediately, 2) Evacuate if safe to do so, 3) Follow your predetermined evacuation route, 4) Stay low to avoid smoke inhalation. Never ignore signs of fire.";
+            } else if (message.includes('protect') || message.includes('home')) {
+                return "To protect your home: Create defensible space (30+ feet clearance), use fire-resistant materials, maintain gutters, install sprinklers, trim trees away from structures, and have an emergency plan ready.";
+            } else if (message.includes('evacuation') || message.includes('route')) {
+                return "Current evacuation routes: Highway 101 (north/south), Highway 126 (east), Highway 33 (north). Monitor local emergency alerts for closures. Always have multiple routes planned and practice them with your family.";
+            } else if (message.includes('weather') || message.includes('conditions')) {
+                return `Current conditions show ${currentRiskScore}% risk level. Temperature: ${weatherData.temperature}°F, Humidity: ${weatherData.humidity}%, Wind: ${weatherData.windSpeed} mph. These conditions ${currentRiskScore > 70 ? 'create elevated fire risk' : 'are within normal parameters'}.`;
+            } else if (message.includes('alert') || message.includes('warning')) {
+                return "Stay updated with: Ventura County Alert system, CAL FIRE updates, local news, weather radio, and emergency apps. Sign up for local emergency notifications to receive immediate alerts.";
+            } else if (message.includes('kit') || message.includes('emergency')) {
+                return "Emergency kit essentials: Water (1 gallon per person per day), non-perishable food, first aid kit, flashlight, radio, batteries, medications, important documents, cash, and emergency contacts list.";
+            } else {
+                return "I'm here to help with wildfire safety questions. You can ask about current conditions, evacuation procedures, home protection, emergency kits, or fire prevention. What specific information do you need?";
+            }
+        }
+
         // Event listeners
         document.getElementById('refreshData').addEventListener('click', refreshData);
 
         // Initialize dashboard on load
-        document.addEventListener('DOMContentLoaded', initializeDashboard);
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDashboard();
+            initializeMap();
+        });
 
         // Auto-refresh every 5 minutes
         setInterval(() => {
