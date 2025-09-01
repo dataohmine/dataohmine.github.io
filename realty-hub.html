@@ -131,7 +131,10 @@
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-xl font-semibold text-gray-900">Property Listings Dashboard</h2>
-                    <div class="flex items-center space-x-2">
+                    <div class="flex items-center space-x-4">
+                        <button onclick="showAddListingModal()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition text-sm">
+                            <i class="fas fa-plus mr-2"></i>Add Listing
+                        </button>
                         <span class="text-sm text-gray-500">Welcome, Demo User</span>
                         <button onclick="logout()" class="text-sm text-red-600 hover:text-red-700">
                             <i class="fas fa-sign-out-alt mr-1"></i>Logout
@@ -675,6 +678,289 @@
             `;
             
             document.body.appendChild(modal);
+        }
+
+        // Show Add Listing Modal
+        function showAddListingModal() {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50';
+            modal.onclick = (e) => {
+                if (e.target === modal) {
+                    document.body.removeChild(modal);
+                }
+            };
+            
+            modal.innerHTML = `
+                <div class="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold text-gray-900">Add New Property Listing</h2>
+                            <button onclick="document.body.removeChild(this.closest('.fixed'))" class="text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+                        
+                        <div id="uploadStep" class="text-center">
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 mb-6">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                                <h3 class="text-lg font-semibold text-gray-700 mb-2">Upload Property Photos</h3>
+                                <p class="text-gray-500 mb-4">Upload photos and our AI will automatically generate a property listing</p>
+                                
+                                <input type="file" id="photoUpload" multiple accept="image/*" class="hidden" onchange="handlePhotoUpload(event)">
+                                <button onclick="document.getElementById('photoUpload').click()" class="bg-primary text-white px-6 py-3 rounded-lg hover:bg-secondary transition">
+                                    <i class="fas fa-upload mr-2"></i>Select Photos
+                                </button>
+                                
+                                <div id="uploadProgress" class="hidden mt-4">
+                                    <div class="bg-gray-200 rounded-full h-2 mb-2">
+                                        <div id="progressBar" class="bg-primary h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                                    </div>
+                                    <p class="text-sm text-gray-600" id="progressText">Processing photos...</p>
+                                </div>
+                                
+                                <div id="uploadedPhotos" class="mt-4 grid grid-cols-3 gap-2"></div>
+                            </div>
+                            
+                            <div class="flex justify-between">
+                                <button onclick="document.body.removeChild(this.closest('.fixed'))" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                                    Cancel
+                                </button>
+                                <button id="generateBtn" onclick="generateListing()" disabled class="px-6 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed">
+                                    Generate Listing
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="generatedListing" class="hidden">
+                            <h3 class="text-lg font-semibold mb-4">Generated Property Listing</h3>
+                            <div id="listingContent" class="space-y-4 mb-6">
+                                <!-- Generated content will appear here -->
+                            </div>
+                            <div class="flex justify-between">
+                                <button onclick="resetUpload()" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                                    Upload New Photos
+                                </button>
+                                <button onclick="saveGeneratedListing()" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-secondary transition">
+                                    Save Listing
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        let uploadedFiles = [];
+        let generatedProperty = null;
+
+        // Handle photo upload
+        function handlePhotoUpload(event) {
+            const files = Array.from(event.target.files);
+            uploadedFiles = files;
+            
+            const uploadedPhotos = document.getElementById('uploadedPhotos');
+            const generateBtn = document.getElementById('generateBtn');
+            
+            uploadedPhotos.innerHTML = '';
+            
+            files.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('div');
+                    img.className = 'relative';
+                    img.innerHTML = `
+                        <img src="${e.target.result}" alt="Upload ${index + 1}" class="w-full h-20 object-cover rounded border">
+                        <div class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs cursor-pointer" onclick="removePhoto(${index})">
+                            <i class="fas fa-times"></i>
+                        </div>
+                    `;
+                    uploadedPhotos.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+            
+            if (files.length > 0) {
+                generateBtn.disabled = false;
+                generateBtn.className = 'px-6 py-2 bg-primary text-white rounded-lg hover:bg-secondary transition cursor-pointer';
+            }
+        }
+
+        // Remove uploaded photo
+        function removePhoto(index) {
+            uploadedFiles.splice(index, 1);
+            handlePhotoUpload({ target: { files: uploadedFiles } });
+        }
+
+        // Generate listing from photos
+        function generateListing() {
+            const progressDiv = document.getElementById('uploadProgress');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const uploadStep = document.getElementById('uploadStep');
+            const generatedDiv = document.getElementById('generatedListing');
+            
+            progressDiv.classList.remove('hidden');
+            
+            // Simulate AI processing with progress
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 25;
+                if (progress > 100) progress = 100;
+                
+                progressBar.style.width = progress + '%';
+                
+                if (progress < 30) {
+                    progressText.textContent = 'Analyzing photos...';
+                } else if (progress < 60) {
+                    progressText.textContent = 'Identifying property features...';
+                } else if (progress < 90) {
+                    progressText.textContent = 'Generating description...';
+                } else {
+                    progressText.textContent = 'Finalizing listing...';
+                }
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        // Generate realistic property data based on uploaded photos
+                        const propertyData = generateRealisticProperty();
+                        displayGeneratedListing(propertyData);
+                        uploadStep.classList.add('hidden');
+                        generatedDiv.classList.remove('hidden');
+                    }, 1000);
+                }
+            }, 200);
+        }
+
+        // Generate realistic property based on analysis (simulated AI)
+        function generateRealisticProperty() {
+            const propertyTypes = ['Luxury Estate', 'Modern Condo', 'Single Family Home', 'Townhouse', 'Craftsman Home'];
+            const cities = ['Beverly Hills, CA', 'Santa Monica, CA', 'West Hollywood, CA', 'Pasadena, CA', 'Manhattan Beach, CA'];
+            const agents = ['Sarah Johnson', 'Mike Chen', 'Lisa Rodriguez', 'David Park', 'Amanda Torres'];
+            
+            const randomType = propertyTypes[Math.floor(Math.random() * propertyTypes.length)];
+            const randomCity = cities[Math.floor(Math.random() * cities.length)];
+            const randomAgent = agents[Math.floor(Math.random() * agents.length)];
+            
+            const basePrice = Math.floor(Math.random() * 3000000) + 500000;
+            const beds = Math.floor(Math.random() * 4) + 2;
+            const baths = beds - 1 + Math.random() > 0.5 ? 0.5 : 0;
+            const sqft = Math.floor(Math.random() * 2000) + 1200;
+            
+            return {
+                id: Date.now(),
+                address: `${Math.floor(Math.random() * 9999) + 1000} ${['Oak', 'Pine', 'Maple', 'Cedar', 'Elm'][Math.floor(Math.random() * 5)]} ${['Street', 'Avenue', 'Boulevard', 'Drive', 'Lane'][Math.floor(Math.random() * 5)]}`,
+                city: randomCity,
+                price: `$${basePrice.toLocaleString()}`,
+                type: randomType,
+                beds: beds,
+                baths: baths,
+                sqft: sqft.toLocaleString(),
+                yearBuilt: Math.floor(Math.random() * 30) + 1990,
+                lotSize: (Math.random() * 0.8 + 0.1).toFixed(2) + ' acres',
+                parking: ['2-car garage', '3-car garage', '1-car garage + driveway', 'Detached garage'][Math.floor(Math.random() * 4)],
+                description: generatePropertyDescription(randomType),
+                status: 'For Sale',
+                daysOnMarket: Math.floor(Math.random() * 60) + 1,
+                agent: randomAgent,
+                image: uploadedFiles.length > 0 ? URL.createObjectURL(uploadedFiles[0]) : 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                images: uploadedFiles.map(file => URL.createObjectURL(file))
+            };
+        }
+
+        // Generate property description based on type
+        function generatePropertyDescription(type) {
+            const descriptions = {
+                'Luxury Estate': 'Stunning contemporary estate with panoramic views. Features include gourmet kitchen with premium appliances, infinity pool, home theater, and wine cellar. Premium finishes throughout with marble countertops and hardwood floors.',
+                'Modern Condo': 'Sleek urban condo with floor-to-ceiling windows and city views. Building amenities include rooftop pool, fitness center, and concierge service. Open-concept design with modern fixtures and smart home technology.',
+                'Single Family Home': 'Beautiful single-family home in desirable neighborhood. Updated kitchen and bathrooms, spacious living areas, and private backyard. Perfect for families with excellent schools nearby.',
+                'Townhouse': 'Contemporary townhouse with modern amenities and convenient location. Open floor plan, rooftop terrace, and attached garage. Walking distance to shopping, dining, and transportation.',
+                'Craftsman Home': 'Charming Craftsman with original character and modern updates. Hardwood floors, built-in cabinets, and large front porch. Beautifully maintained with period details throughout.'
+            };
+            
+            return descriptions[type] || descriptions['Single Family Home'];
+        }
+
+        // Display generated listing
+        function displayGeneratedListing(property) {
+            generatedProperty = property;
+            const listingContent = document.getElementById('listingContent');
+            
+            listingContent.innerHTML = `
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <img src="${property.image}" alt="${property.address}" class="w-full h-48 object-cover rounded-lg">
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="text-xl font-bold text-gray-900">${property.address}</h4>
+                        <p class="text-gray-600">${property.city}</p>
+                        <p class="text-2xl font-bold text-primary">${property.price}</p>
+                        <div class="flex space-x-4 text-sm text-gray-500">
+                            <span><i class="fas fa-bed mr-1"></i>${property.beds} beds</span>
+                            <span><i class="fas fa-bath mr-1"></i>${property.baths} baths</span>
+                            <span><i class="fas fa-ruler-combined mr-1"></i>${property.sqft} sqft</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h5 class="font-semibold mb-2">Generated Description:</h5>
+                    <p class="text-gray-700">${property.description}</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <strong>Property Type:</strong> ${property.type}
+                    </div>
+                    <div>
+                        <strong>Year Built:</strong> ${property.yearBuilt}
+                    </div>
+                    <div>
+                        <strong>Lot Size:</strong> ${property.lotSize}
+                    </div>
+                    <div>
+                        <strong>Parking:</strong> ${property.parking}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Save generated listing
+        function saveGeneratedListing() {
+            if (generatedProperty) {
+                sampleProperties.unshift(generatedProperty);
+                generatePropertyListings();
+                document.body.removeChild(document.querySelector('.fixed'));
+                
+                // Show success message
+                const successDiv = document.createElement('div');
+                successDiv.className = 'fixed top-4 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg z-50';
+                successDiv.innerHTML = `
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        Property listing saved successfully!
+                    </div>
+                `;
+                document.body.appendChild(successDiv);
+                
+                setTimeout(() => {
+                    if (document.body.contains(successDiv)) {
+                        document.body.removeChild(successDiv);
+                    }
+                }, 3000);
+            }
+        }
+
+        // Reset upload form
+        function resetUpload() {
+            uploadedFiles = [];
+            generatedProperty = null;
+            document.getElementById('uploadStep').classList.remove('hidden');
+            document.getElementById('generatedListing').classList.add('hidden');
+            document.getElementById('uploadProgress').classList.add('hidden');
+            document.getElementById('uploadedPhotos').innerHTML = '';
+            document.getElementById('generateBtn').disabled = true;
+            document.getElementById('generateBtn').className = 'px-6 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed';
         }
 
         // Check if user is already logged in
