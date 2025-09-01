@@ -89,8 +89,12 @@
                     >
                 </div>
 
-                <button onclick="login()" class="w-full bg-primary hover:bg-secondary text-white px-6 py-3 rounded-lg font-semibold transition duration-300">
+                <button onclick="login()" class="w-full bg-primary hover:bg-secondary text-white px-6 py-3 rounded-lg font-semibold transition duration-300 mb-2">
                     <i class="fas fa-sign-in-alt mr-2"></i>Login to Platform
+                </button>
+                
+                <button onclick="testLogin()" class="w-full bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg text-sm transition duration-300">
+                    <i class="fas fa-bug mr-2"></i>Test JavaScript
                 </button>
 
                 <div class="mt-4 p-3 bg-green-50 rounded-lg">
@@ -483,29 +487,60 @@
 
         // Login functionality
         function login() {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
+            console.log('Login function called');
+            const email = document.getElementById('loginEmail')?.value;
+            const password = document.getElementById('loginPassword')?.value;
+            
+            console.log('Email:', email, 'Password:', password);
 
             if (email && password) {
-                // Simulate JWT token generation
-                const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkRlbW8gVXNlciIsImlhdCI6MTUxNjIzOTAyMn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
-                localStorage.setItem('realtyhub_token', token);
-                
-                // Show dashboard - use a more reliable selector
-                const loginSection = document.querySelector('.grid.lg\\:grid-cols-2.gap-8.mb-8') || 
-                                    document.querySelector('.grid[class*="lg:grid-cols-2"]');
-                if (loginSection) {
-                    loginSection.style.display = 'none';
-                }
-                
-                const dashboard = document.getElementById('dashboard');
-                if (dashboard) {
-                    dashboard.classList.remove('hidden');
+                try {
+                    // Simulate JWT token generation
+                    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkRlbW8gVXNlciIsImlhdCI6MTUxNjIzOTAyMn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+                    localStorage.setItem('realtyhub_token', token);
+                    console.log('Token saved');
                     
-                    // Generate property listings
-                    generatePropertyListings();
-                } else {
-                    console.error('Dashboard element not found');
+                    // Hide login section - try multiple approaches
+                    const loginSections = [
+                        document.querySelector('div.grid.lg\\:grid-cols-2'),
+                        document.querySelector('[class*="grid"][class*="lg:grid-cols-2"]'),
+                        document.querySelector('.grid').closest('[class*="lg:grid-cols-2"]'),
+                        // Find the parent of the login form
+                        document.getElementById('loginEmail')?.closest('.grid')
+                    ];
+                    
+                    let loginSection = null;
+                    for (let section of loginSections) {
+                        if (section) {
+                            loginSection = section;
+                            break;
+                        }
+                    }
+                    
+                    if (loginSection) {
+                        loginSection.style.display = 'none';
+                        console.log('Login section hidden');
+                    } else {
+                        console.error('Could not find login section');
+                    }
+                    
+                    // Show dashboard
+                    const dashboard = document.getElementById('dashboard');
+                    if (dashboard) {
+                        dashboard.classList.remove('hidden');
+                        dashboard.style.display = 'block';
+                        console.log('Dashboard shown');
+                        
+                        // Generate property listings
+                        generatePropertyListings();
+                        console.log('Property listings generated');
+                    } else {
+                        console.error('Dashboard element not found');
+                    }
+                    
+                } catch (error) {
+                    console.error('Login error:', error);
+                    alert('Login failed. Please try again.');
                 }
             } else {
                 alert('Please enter valid credentials');
@@ -515,18 +550,12 @@
         // Logout functionality
         function logout() {
             localStorage.removeItem('realtyhub_token');
-            
-            // Show login section - use more reliable selector
-            const loginSection = document.querySelector('.grid.lg\\:grid-cols-2.gap-8.mb-8') || 
-                                document.querySelector('.grid[class*="lg:grid-cols-2"]');
-            if (loginSection) {
-                loginSection.style.display = 'grid';
-            }
-            
-            const dashboard = document.getElementById('dashboard');
-            if (dashboard) {
-                dashboard.classList.add('hidden');
-            }
+            location.reload(); // Simple approach: just reload the page
+        }
+        
+        // Test function to verify JavaScript is working
+        function testLogin() {
+            alert('JavaScript is working! If you can see this alert, click OK and try logging in.');
         }
 
         // Generate property listings
