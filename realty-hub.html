@@ -793,8 +793,8 @@
             handlePhotoUpload({ target: { files: uploadedFiles } });
         }
 
-        // Generate listing from photos
-        function generateListing() {
+        // Generate listing from photos with advanced AI processing
+        async function generateListing() {
             const progressDiv = document.getElementById('uploadProgress');
             const progressBar = document.getElementById('progressBar');
             const progressText = document.getElementById('progressText');
@@ -803,152 +803,629 @@
             
             progressDiv.classList.remove('hidden');
             
-            // Simulate AI processing with progress
-            let progress = 0;
+            // Enhanced AI processing pipeline with more detailed steps
+            const processingSteps = [
+                { progress: 15, text: 'Uploading and preprocessing images...' },
+                { progress: 25, text: 'Running computer vision analysis...' },
+                { progress: 40, text: 'Identifying rooms and property features...' },
+                { progress: 55, text: 'Analyzing architectural style and finishes...' },
+                { progress: 70, text: 'Estimating property value using market data...' },
+                { progress: 85, text: 'Generating professional listing description...' },
+                { progress: 95, text: 'Optimizing for MLS and marketing platforms...' },
+                { progress: 100, text: 'Listing generation complete!' }
+            ];
+            
+            let stepIndex = 0;
             const interval = setInterval(() => {
-                progress += Math.random() * 25;
-                if (progress > 100) progress = 100;
-                
-                progressBar.style.width = progress + '%';
-                
-                if (progress < 30) {
-                    progressText.textContent = 'Analyzing photos...';
-                } else if (progress < 60) {
-                    progressText.textContent = 'Identifying property features...';
-                } else if (progress < 90) {
-                    progressText.textContent = 'Generating description...';
+                if (stepIndex < processingSteps.length) {
+                    const step = processingSteps[stepIndex];
+                    progressBar.style.width = step.progress + '%';
+                    progressText.textContent = step.text;
+                    stepIndex++;
                 } else {
-                    progressText.textContent = 'Finalizing listing...';
-                }
-                
-                if (progress >= 100) {
                     clearInterval(interval);
                     setTimeout(() => {
-                        // Generate realistic property data based on uploaded photos
-                        const propertyData = generateRealisticProperty();
+                        // Generate enhanced property data with AI insights
+                        const propertyData = await generateAdvancedProperty();
                         displayGeneratedListing(propertyData);
                         uploadStep.classList.add('hidden');
                         generatedDiv.classList.remove('hidden');
-                    }, 1000);
+                    }, 800);
                 }
-            }, 200);
+            }, 400);
         }
 
-        // Generate realistic property based on analysis (simulated AI)
-        function generateRealisticProperty() {
-            const propertyTypes = ['Luxury Estate', 'Modern Condo', 'Single Family Home', 'Townhouse', 'Craftsman Home'];
-            const cities = ['Beverly Hills, CA', 'Santa Monica, CA', 'West Hollywood, CA', 'Pasadena, CA', 'Manhattan Beach, CA'];
-            const agents = ['Sarah Johnson', 'Mike Chen', 'Lisa Rodriguez', 'David Park', 'Amanda Torres'];
+        // Advanced property generation with AI analysis simulation
+        async function generateAdvancedProperty() {
+            // Simulate computer vision analysis of uploaded photos
+            const analysisResults = await analyzeUploadedPhotos();
             
-            const randomType = propertyTypes[Math.floor(Math.random() * propertyTypes.length)];
-            const randomCity = cities[Math.floor(Math.random() * cities.length)];
-            const randomAgent = agents[Math.floor(Math.random() * agents.length)];
-            
-            const basePrice = Math.floor(Math.random() * 3000000) + 500000;
-            const beds = Math.floor(Math.random() * 4) + 2;
-            const baths = beds - 1 + Math.random() > 0.5 ? 0.5 : 0;
-            const sqft = Math.floor(Math.random() * 2000) + 1200;
-            
-            return {
+            // Generate property data based on analysis
+            const propertyData = {
                 id: Date.now(),
-                address: `${Math.floor(Math.random() * 9999) + 1000} ${['Oak', 'Pine', 'Maple', 'Cedar', 'Elm'][Math.floor(Math.random() * 5)]} ${['Street', 'Avenue', 'Boulevard', 'Drive', 'Lane'][Math.floor(Math.random() * 5)]}`,
-                city: randomCity,
-                price: `$${basePrice.toLocaleString()}`,
-                type: randomType,
-                beds: beds,
-                baths: baths,
-                sqft: sqft.toLocaleString(),
-                yearBuilt: Math.floor(Math.random() * 30) + 1990,
-                lotSize: (Math.random() * 0.8 + 0.1).toFixed(2) + ' acres',
-                parking: ['2-car garage', '3-car garage', '1-car garage + driveway', 'Detached garage'][Math.floor(Math.random() * 4)],
-                description: generatePropertyDescription(randomType),
+                address: generateAddress(),
+                city: analysisResults.location,
+                price: analysisResults.estimatedPrice,
+                type: analysisResults.propertyType,
+                beds: analysisResults.bedrooms,
+                baths: analysisResults.bathrooms,
+                sqft: analysisResults.squareFootage,
+                yearBuilt: analysisResults.yearBuilt,
+                lotSize: analysisResults.lotSize,
+                parking: analysisResults.parking,
+                description: generateEnhancedDescription(analysisResults),
                 status: 'For Sale',
                 daysOnMarket: Math.floor(Math.random() * 60) + 1,
-                agent: randomAgent,
+                agent: analysisResults.suggestedAgent,
                 image: uploadedFiles.length > 0 ? URL.createObjectURL(uploadedFiles[0]) : 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-                images: uploadedFiles.map(file => URL.createObjectURL(file))
+                images: uploadedFiles.map(file => URL.createObjectURL(file)),
+                // Enhanced data
+                aiAnalysis: analysisResults.analysis,
+                marketInsights: analysisResults.marketData,
+                features: analysisResults.features,
+                condition: analysisResults.condition,
+                pricePerSqft: Math.round(analysisResults.estimatedPrice / analysisResults.squareFootage),
+                mlsOptimized: true
+            };
+
+            return propertyData;
+        }
+
+        // Simulate advanced photo analysis
+        async function analyzeUploadedPhotos() {
+            // Simulate processing delay for realism
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            const propertyTypes = ['Luxury Estate', 'Modern Condo', 'Single Family Home', 'Contemporary Townhouse', 'Craftsman Home', 'Mid-Century Modern', 'Victorian', 'Spanish Colonial'];
+            const cities = ['Beverly Hills, CA', 'Santa Monica, CA', 'West Hollywood, CA', 'Pasadena, CA', 'Manhattan Beach, CA', 'Malibu, CA', 'Brentwood, CA', 'Venice, CA'];
+            const agents = ['Sarah Johnson', 'Mike Chen', 'Lisa Rodriguez', 'David Park', 'Amanda Torres', 'Jennifer Kim', 'Robert Williams', 'Maria Garcia'];
+            
+            const propertyType = propertyTypes[Math.floor(Math.random() * propertyTypes.length)];
+            const basePrice = getBasePriceByType(propertyType);
+            const beds = Math.floor(Math.random() * 4) + 2;
+            const baths = beds - 1 + (Math.random() > 0.5 ? 0.5 : 0);
+            const sqft = Math.floor(Math.random() * 2500) + 1500;
+            
+            return {
+                propertyType: propertyType,
+                location: cities[Math.floor(Math.random() * cities.length)],
+                estimatedPrice: basePrice + Math.floor(Math.random() * 1000000),
+                bedrooms: beds,
+                bathrooms: baths,
+                squareFootage: sqft,
+                yearBuilt: Math.floor(Math.random() * 40) + 1980,
+                lotSize: (Math.random() * 0.8 + 0.15).toFixed(2) + ' acres',
+                parking: generateParkingByType(propertyType),
+                suggestedAgent: agents[Math.floor(Math.random() * agents.length)],
+                analysis: generateAIAnalysis(),
+                marketData: generateMarketInsights(),
+                features: generatePropertyFeatures(propertyType),
+                condition: generateConditionAssessment()
             };
         }
 
-        // Generate property description based on type
-        function generatePropertyDescription(type) {
-            const descriptions = {
-                'Luxury Estate': 'Stunning contemporary estate with panoramic views. Features include gourmet kitchen with premium appliances, infinity pool, home theater, and wine cellar. Premium finishes throughout with marble countertops and hardwood floors.',
-                'Modern Condo': 'Sleek urban condo with floor-to-ceiling windows and city views. Building amenities include rooftop pool, fitness center, and concierge service. Open-concept design with modern fixtures and smart home technology.',
-                'Single Family Home': 'Beautiful single-family home in desirable neighborhood. Updated kitchen and bathrooms, spacious living areas, and private backyard. Perfect for families with excellent schools nearby.',
-                'Townhouse': 'Contemporary townhouse with modern amenities and convenient location. Open floor plan, rooftop terrace, and attached garage. Walking distance to shopping, dining, and transportation.',
-                'Craftsman Home': 'Charming Craftsman with original character and modern updates. Hardwood floors, built-in cabinets, and large front porch. Beautifully maintained with period details throughout.'
+        // Generate base price by property type
+        function getBasePriceByType(type) {
+            const basePrices = {
+                'Luxury Estate': 2500000,
+                'Modern Condo': 800000,
+                'Single Family Home': 1200000,
+                'Contemporary Townhouse': 950000,
+                'Craftsman Home': 1100000,
+                'Mid-Century Modern': 1400000,
+                'Victorian': 1300000,
+                'Spanish Colonial': 1350000
+            };
+            return basePrices[type] || 1000000;
+        }
+
+        // Generate parking based on property type
+        function generateParkingByType(type) {
+            const parkingOptions = {
+                'Luxury Estate': ['3-car garage + circular driveway', '4-car garage + guest parking', '2-car garage + carport'],
+                'Modern Condo': ['2 assigned spaces', '1 space + storage', 'Valet parking'],
+                'Single Family Home': ['2-car garage', 'Attached garage + driveway', '1-car garage + street parking'],
+                'Contemporary Townhouse': ['2-car garage', 'Tandem parking', 'Private garage'],
+                'Craftsman Home': ['Detached 2-car garage', 'Carport + driveway', 'Street parking + permit'],
+                'Mid-Century Modern': ['2-car carport', 'Attached garage', 'Covered parking'],
+                'Victorian': ['Converted carriage house', 'Shared driveway', 'Street parking'],
+                'Spanish Colonial': ['Courtyard parking', 'Detached garage', 'Covered parking']
+            };
+            const options = parkingOptions[type] || ['2-car garage', 'Driveway parking', 'Street parking'];
+            return options[Math.floor(Math.random() * options.length)];
+        }
+
+        // Generate helper functions for advanced property analysis
+        function generateAddress() {
+            const streetNumbers = Math.floor(Math.random() * 9999) + 1000;
+            const streetNames = ['Oak', 'Pine', 'Maple', 'Cedar', 'Elm', 'Willow', 'Canyon', 'Sunset', 'Ocean', 'Mountain'];
+            const streetTypes = ['Street', 'Avenue', 'Boulevard', 'Drive', 'Lane', 'Way', 'Place', 'Court'];
+            return `${streetNumbers} ${streetNames[Math.floor(Math.random() * streetNames.length)]} ${streetTypes[Math.floor(Math.random() * streetTypes.length)]}`;
+        }
+
+        // Generate AI analysis insights
+        function generateAIAnalysis() {
+            const insights = [
+                "Computer vision detected high-end finishes and modern fixtures throughout",
+                "Natural light analysis shows excellent exposure with large windows",
+                "Kitchen features premium appliances and granite/quartz countertops",
+                "Bathrooms show recent renovation with contemporary tile work",
+                "Hardwood floors in excellent condition detected in main living areas",
+                "Outdoor space includes well-maintained landscaping and entertainment areas",
+                "Architecture suggests mid-century modern design with clean lines",
+                "Room proportions indicate open-concept living with high ceilings"
+            ];
+            const randomInsights = [];
+            for (let i = 0; i < 3 + Math.floor(Math.random() * 3); i++) {
+                const randomInsight = insights[Math.floor(Math.random() * insights.length)];
+                if (!randomInsights.includes(randomInsight)) {
+                    randomInsights.push(randomInsight);
+                }
+            }
+            return randomInsights;
+        }
+
+        // Generate market insights
+        function generateMarketInsights() {
+            const avgPricePsf = 450 + Math.floor(Math.random() * 350);
+            const marketTrend = Math.random() > 0.5 ? 'increasing' : 'stable';
+            const competitiveIndex = Math.floor(Math.random() * 100);
+            
+            return {
+                averagePricePerSqft: avgPricePsf,
+                marketTrend: marketTrend,
+                daysOnMarketAvg: Math.floor(Math.random() * 45) + 15,
+                competitiveIndex: competitiveIndex,
+                priceRecommendation: marketTrend === 'increasing' ? 'Price aggressively' : 'Price competitively',
+                comparableProperties: Math.floor(Math.random() * 15) + 5,
+                neighborhoodRating: (Math.random() * 2 + 3).toFixed(1) // 3.0 - 5.0 rating
+            };
+        }
+
+        // Generate property features based on type
+        function generatePropertyFeatures(type) {
+            const baseFeatures = ['Updated kitchen', 'Modern bathrooms', 'Central air/heat', 'Hardwood floors'];
+            const luxuryFeatures = ['Infinity pool', 'Wine cellar', 'Home theater', 'Smart home system', 'Gourmet kitchen', 'Master suite with sitting area'];
+            const condoFeatures = ['Concierge service', 'Rooftop deck', 'Fitness center', 'In-unit laundry', 'Balcony with views'];
+            const familyFeatures = ['Large backyard', 'Family room', 'Breakfast nook', 'Walk-in closets', 'Two-car garage'];
+            
+            let features = [...baseFeatures];
+            
+            if (type.includes('Luxury') || type.includes('Estate')) {
+                features = features.concat(luxuryFeatures.slice(0, 3 + Math.floor(Math.random() * 3)));
+            } else if (type.includes('Condo')) {
+                features = features.concat(condoFeatures.slice(0, 2 + Math.floor(Math.random() * 3)));
+            } else {
+                features = features.concat(familyFeatures.slice(0, 2 + Math.floor(Math.random() * 3)));
+            }
+            
+            return features;
+        }
+
+        // Generate condition assessment
+        function generateConditionAssessment() {
+            const conditions = ['Excellent', 'Very Good', 'Good', 'Fair'];
+            const condition = conditions[Math.floor(Math.random() * conditions.length)];
+            const issues = [];
+            
+            if (condition === 'Fair') {
+                issues.push('Minor cosmetic updates recommended');
+            } else if (condition === 'Good') {
+                issues.push('Well-maintained with some normal wear');
+            }
+            
+            return {
+                overall: condition,
+                issues: issues,
+                lastUpdated: `${Math.floor(Math.random() * 10) + 1} years ago`,
+                score: conditions.indexOf(condition) === 0 ? 95 : 
+                       conditions.indexOf(condition) === 1 ? 85 :
+                       conditions.indexOf(condition) === 2 ? 75 : 65
+            };
+        }
+
+        // Enhanced property description generator
+        function generateEnhancedDescription(analysisResults) {
+            const type = analysisResults.propertyType;
+            const features = analysisResults.features.slice(0, 4).join(', ');
+            const condition = analysisResults.condition.overall.toLowerCase();
+            
+            const templates = {
+                'Luxury Estate': `Magnificent ${type.toLowerCase()} showcasing ${condition} condition throughout. This stunning property features ${features}, creating an unparalleled living experience. The thoughtfully designed layout maximizes both comfort and sophistication, with premium materials and finishes evident in every detail.`,
+                
+                'Modern Condo': `Sophisticated ${type.toLowerCase()} in ${condition} condition offers contemporary urban living at its finest. Featuring ${features}, this residence provides both style and convenience. Floor-to-ceiling windows flood the space with natural light while modern amenities ensure comfort and luxury.`,
+                
+                'Single Family Home': `Beautiful ${type.toLowerCase()} in ${condition} condition, perfect for families seeking comfort and functionality. This well-appointed home includes ${features}, offering the ideal blend of modern updates and timeless appeal. The thoughtful layout creates seamless flow for both daily living and entertaining.`,
+                
+                'Contemporary Townhouse': `Striking ${type.toLowerCase()} in ${condition} condition combines modern design with practical living. Featuring ${features}, this residence offers the perfect urban lifestyle with suburban comfort. The open-concept design and premium finishes create an impressive living environment.`,
+                
+                'Craftsman Home': `Charming ${type.toLowerCase()} in ${condition} condition beautifully preserves period character while offering modern conveniences. This distinctive property features ${features}, blending original architectural details with contemporary updates. The timeless design creates warmth and character throughout.`,
+                
+                'Mid-Century Modern': `Iconic ${type.toLowerCase()} in ${condition} condition exemplifies the best of mid-century design principles. Featuring ${features}, this architectural gem offers clean lines, open spaces, and seamless indoor-outdoor living. The thoughtful renovation respects the original design while adding modern functionality.`,
+                
+                'Victorian': `Elegant ${type.toLowerCase()} in ${condition} condition showcases the grandeur and craftsmanship of a bygone era. This distinguished property features ${features}, combining original period details with carefully integrated modern amenities. The ornate architecture and rich materials create a truly unique living experience.`,
+                
+                'Spanish Colonial': `Stunning ${type.toLowerCase()} in ${condition} condition captures the romance and elegance of Spanish colonial architecture. Featuring ${features}, this distinctive residence offers timeless appeal with modern comfort. The authentic details and warm materials create an inviting atmosphere throughout.`
             };
             
-            return descriptions[type] || descriptions['Single Family Home'];
+            return templates[type] || templates['Single Family Home'].replace('Single Family Home', type);
         }
 
-        // Display generated listing
+        // Display enhanced generated listing with AI insights
         function displayGeneratedListing(property) {
             generatedProperty = property;
             const listingContent = document.getElementById('listingContent');
             
+            const formatPrice = (price) => {
+                if (typeof price === 'string') return price;
+                return `$${price.toLocaleString()}`;
+            };
+            
             listingContent.innerHTML = `
-                <div class="grid md:grid-cols-2 gap-4">
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
                     <div>
                         <img src="${property.image}" alt="${property.address}" class="w-full h-48 object-cover rounded-lg">
+                        <div class="mt-2 flex items-center justify-between text-xs text-gray-500">
+                            <span><i class="fas fa-robot mr-1"></i>AI Generated</span>
+                            <span><i class="fas fa-check-circle text-green-500 mr-1"></i>MLS Ready</span>
+                        </div>
                     </div>
-                    <div class="space-y-2">
+                    <div class="space-y-3">
                         <h4 class="text-xl font-bold text-gray-900">${property.address}</h4>
                         <p class="text-gray-600">${property.city}</p>
-                        <p class="text-2xl font-bold text-primary">${property.price}</p>
+                        <p class="text-2xl font-bold text-primary">${formatPrice(property.price)}</p>
                         <div class="flex space-x-4 text-sm text-gray-500">
                             <span><i class="fas fa-bed mr-1"></i>${property.beds} beds</span>
                             <span><i class="fas fa-bath mr-1"></i>${property.baths} baths</span>
                             <span><i class="fas fa-ruler-combined mr-1"></i>${property.sqft} sqft</span>
                         </div>
+                        <div class="text-sm">
+                            <span class="text-gray-600">Price/sq ft:</span> 
+                            <span class="font-semibold">$${property.pricePerSqft}</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                                ${property.condition?.overall || 'Excellent'} Condition
+                            </div>
+                            <div class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                                ${property.condition?.score || 95} Score
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div>
-                    <h5 class="font-semibold mb-2">Generated Description:</h5>
-                    <p class="text-gray-700">${property.description}</p>
-                </div>
-                <div class="grid md:grid-cols-2 gap-4 text-sm">
-                    <div>
-                        <strong>Property Type:</strong> ${property.type}
-                    </div>
-                    <div>
-                        <strong>Year Built:</strong> ${property.yearBuilt}
-                    </div>
-                    <div>
-                        <strong>Lot Size:</strong> ${property.lotSize}
-                    </div>
-                    <div>
-                        <strong>Parking:</strong> ${property.parking}
+
+                <div class="mb-6">
+                    <h5 class="font-semibold mb-3 text-lg flex items-center">
+                        <i class="fas fa-file-alt text-primary mr-2"></i>AI-Generated Description
+                    </h5>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-gray-700 leading-relaxed">${property.description}</p>
                     </div>
                 </div>
+
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <h5 class="font-semibold mb-3 flex items-center">
+                            <i class="fas fa-home text-primary mr-2"></i>Property Details
+                        </h5>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Property Type:</span>
+                                <span class="font-medium">${property.type}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Year Built:</span>
+                                <span class="font-medium">${property.yearBuilt}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Lot Size:</span>
+                                <span class="font-medium">${property.lotSize}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Parking:</span>
+                                <span class="font-medium">${property.parking}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h5 class="font-semibold mb-3 flex items-center">
+                            <i class="fas fa-chart-line text-primary mr-2"></i>Market Analysis
+                        </h5>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Market Trend:</span>
+                                <span class="font-medium capitalize ${property.marketInsights?.marketTrend === 'increasing' ? 'text-green-600' : 'text-blue-600'}">${property.marketInsights?.marketTrend || 'Stable'}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Area Avg Price/sf:</span>
+                                <span class="font-medium">$${property.marketInsights?.averagePricePerSqft || 650}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Avg Days on Market:</span>
+                                <span class="font-medium">${property.marketInsights?.daysOnMarketAvg || 30} days</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Comparable Properties:</span>
+                                <span class="font-medium">${property.marketInsights?.comparableProperties || 8}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                ${property.aiAnalysis && property.aiAnalysis.length > 0 ? `
+                <div class="mb-6">
+                    <h5 class="font-semibold mb-3 flex items-center">
+                        <i class="fas fa-brain text-primary mr-2"></i>AI Photo Analysis
+                    </h5>
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <ul class="space-y-1 text-sm text-gray-700">
+                            ${property.aiAnalysis.map(insight => `<li class="flex items-start"><i class="fas fa-check text-blue-500 mr-2 mt-0.5 flex-shrink-0"></i>${insight}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+                ` : ''}
+
+                ${property.features && property.features.length > 0 ? `
+                <div class="mb-6">
+                    <h5 class="font-semibold mb-3 flex items-center">
+                        <i class="fas fa-star text-primary mr-2"></i>Key Features
+                    </h5>
+                    <div class="flex flex-wrap gap-2">
+                        ${property.features.map(feature => `<span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">${feature}</span>`).join('')}
+                    </div>
+                </div>
+                ` : ''}
             `;
         }
 
-        // Save generated listing
+        // Save and distribute generated listing
         function saveGeneratedListing() {
             if (generatedProperty) {
+                // Add to local properties
                 sampleProperties.unshift(generatedProperty);
                 generatePropertyListings();
+                
+                // Show distribution modal
+                showDistributionModal(generatedProperty);
+                
+                // Close the listing creation modal
                 document.body.removeChild(document.querySelector('.fixed'));
-                
-                // Show success message
-                const successDiv = document.createElement('div');
-                successDiv.className = 'fixed top-4 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg z-50';
-                successDiv.innerHTML = `
-                    <div class="flex items-center">
-                        <i class="fas fa-check-circle mr-2"></i>
-                        Property listing saved successfully!
-                    </div>
-                `;
-                document.body.appendChild(successDiv);
-                
-                setTimeout(() => {
-                    if (document.body.contains(successDiv)) {
-                        document.body.removeChild(successDiv);
-                    }
-                }, 3000);
             }
+        }
+        
+        // Show property distribution modal
+        function showDistributionModal(property) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50';
+            modal.onclick = (e) => {
+                if (e.target === modal) {
+                    document.body.removeChild(modal);
+                }
+            };
+            
+            modal.innerHTML = `
+                <div class="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold text-gray-900">Distribute Property Listing</h2>
+                            <button onclick="document.body.removeChild(this.closest('.fixed'))" class="text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="bg-green-50 p-4 rounded-lg mb-6">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                <span class="font-semibold text-green-800">Listing Generated Successfully!</span>
+                            </div>
+                            <p class="text-green-700 text-sm">Your property listing is ready for distribution across multiple platforms.</p>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <h3 class="font-semibold mb-3">Property Summary</h3>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="flex items-center space-x-4">
+                                    <img src="${property.image}" alt="${property.address}" class="w-16 h-16 object-cover rounded">
+                                    <div>
+                                        <div class="font-semibold">${property.address}</div>
+                                        <div class="text-gray-600">${property.city}</div>
+                                        <div class="text-primary font-bold">${formatPrice(property.price)}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <h3 class="font-semibold mb-3">Distribution Platforms</h3>
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="mls" checked class="mr-3 w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
+                                        <div>
+                                            <div class="font-medium">MLS (Multiple Listing Service)</div>
+                                            <div class="text-sm text-gray-500">Primary real estate database</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-green-600"><i class="fas fa-check-circle"></i></div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="zillow" checked class="mr-3 w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
+                                        <div>
+                                            <div class="font-medium">Zillow</div>
+                                            <div class="text-sm text-gray-500">Leading real estate platform</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-green-600"><i class="fas fa-check-circle"></i></div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="facebook" class="mr-3 w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
+                                        <div>
+                                            <div class="font-medium">Facebook Marketplace</div>
+                                            <div class="text-sm text-gray-500">Social media real estate listings</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-gray-400"><i class="fas fa-clock"></i></div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="realtor" class="mr-3 w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
+                                        <div>
+                                            <div class="font-medium">Realtor.com</div>
+                                            <div class="text-sm text-gray-500">Official realtor listings platform</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-gray-400"><i class="fas fa-clock"></i></div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="redfin" class="mr-3 w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
+                                        <div>
+                                            <div class="font-medium">Redfin</div>
+                                            <div class="text-sm text-gray-500">Modern real estate brokerage</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-gray-400"><i class="fas fa-clock"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-blue-50 p-4 rounded-lg mb-6">
+                            <h4 class="font-semibold mb-2 text-blue-800">Distribution Schedule</h4>
+                            <div class="space-y-1 text-sm text-blue-700">
+                                <div>• MLS: Immediate (Available now)</div>
+                                <div>• Zillow: 15-30 minutes</div>
+                                <div>• Other Platforms: 1-2 hours</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between">
+                            <button onclick="document.body.removeChild(this.closest('.fixed'))" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                                Save Only
+                            </button>
+                            <button onclick="distributeProperty('${property.id}')" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-secondary transition">
+                                <i class="fas fa-share mr-2"></i>Distribute Listing
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Format price helper function
+        function formatPrice(price) {
+            if (typeof price === 'string') return price;
+            return `$${price.toLocaleString()}`;
+        }
+        
+        // Distribute property to selected platforms
+        function distributeProperty(propertyId) {
+            const selectedPlatforms = [];
+            const checkboxes = ['mls', 'zillow', 'facebook', 'realtor', 'redfin'];
+            
+            checkboxes.forEach(platform => {
+                const checkbox = document.getElementById(platform);
+                if (checkbox && checkbox.checked) {
+                    selectedPlatforms.push(platform);
+                }
+            });
+            
+            // Close modal
+            document.body.removeChild(document.querySelector('.fixed'));
+            
+            // Show distribution progress
+            showDistributionProgress(selectedPlatforms);
+        }
+        
+        // Show distribution progress
+        function showDistributionProgress(platforms) {
+            const progressModal = document.createElement('div');
+            progressModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50';
+            
+            progressModal.innerHTML = `
+                <div class="bg-white rounded-xl max-w-lg w-full p-6">
+                    <div class="text-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-900">Distributing Property Listing</h3>
+                        <p class="text-gray-600">Publishing to ${platforms.length} platform(s)</p>
+                    </div>
+                    
+                    <div id="distributionStatus" class="space-y-3">
+                        ${platforms.map(platform => `
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg" id="${platform}_status">
+                                <div class="flex items-center">
+                                    <div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mr-3"></div>
+                                    <span class="capitalize">${platform === 'mls' ? 'MLS' : platform}</span>
+                                </div>
+                                <span class="text-yellow-600">Publishing...</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="mt-6 text-center">
+                        <div class="text-sm text-gray-500">This may take a few moments...</div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(progressModal);
+            
+            // Simulate distribution process
+            platforms.forEach((platform, index) => {
+                setTimeout(() => {
+                    const statusElement = document.getElementById(`${platform}_status`);
+                    if (statusElement) {
+                        statusElement.innerHTML = `
+                            <div class="flex items-center">
+                                <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-check text-white text-sm"></i>
+                                </div>
+                                <span class="capitalize">${platform === 'mls' ? 'MLS' : platform}</span>
+                            </div>
+                            <span class="text-green-600">Published</span>
+                        `;
+                    }
+                    
+                    // Show completion when all platforms are done
+                    if (index === platforms.length - 1) {
+                        setTimeout(() => {
+                            showDistributionSuccess(platforms.length);
+                            if (document.body.contains(progressModal)) {
+                                document.body.removeChild(progressModal);
+                            }
+                        }, 1000);
+                    }
+                }, (index + 1) * 1500);
+            });
+        }
+        
+        // Show distribution success message
+        function showDistributionSuccess(platformCount) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'fixed top-4 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg z-50 max-w-sm';
+            successDiv.innerHTML = `
+                <div class="flex items-start">
+                    <i class="fas fa-check-circle mr-3 mt-0.5 text-xl"></i>
+                    <div>
+                        <div class="font-semibold">Distribution Complete!</div>
+                        <div class="text-sm opacity-90">Property published to ${platformCount} platform(s)</div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(successDiv);
+            
+            setTimeout(() => {
+                if (document.body.contains(successDiv)) {
+                    document.body.removeChild(successDiv);
+                }
+            }, 4000);
         }
 
         // Reset upload form
