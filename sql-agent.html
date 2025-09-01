@@ -462,30 +462,74 @@
         // Convert natural language to SQL
         function convertToSQL(query) {
             const lowerQuery = query.toLowerCase();
+            const dbConfig = databases[currentDatabase];
+            const availableTables = Object.keys(dbConfig.tables);
             
-            // Check patterns
-            for (const [pattern, sql] of Object.entries(sqlPatterns)) {
+            // Database-specific patterns
+            const contextualPatterns = {
+                ecommerce: {
+                    'top.*customers.*orders': "SELECT c.name, c.email, COUNT(o.id) as order_count FROM customers c LEFT JOIN orders o ON c.id = o.customer_id GROUP BY c.id, c.name, c.email ORDER BY order_count DESC LIMIT 5",
+                    'top.*customers.*spent': "SELECT c.name, c.email, c.total_spent FROM customers c ORDER BY c.total_spent DESC LIMIT 5",
+                    'customers.*city': "SELECT city, COUNT(*) as customer_count FROM customers GROUP BY city ORDER BY customer_count DESC",
+                    'average.*order.*value': "SELECT AVG(total_amount) as average_order_value FROM orders",
+                    'total.*revenue': "SELECT SUM(total_amount) as total_revenue FROM orders WHERE status = 'completed'",
+                    'orders.*month': "SELECT COUNT(*) as orders_this_month FROM orders WHERE strftime('%Y-%m', order_date) = strftime('%Y-%m', 'now')",
+                    'monthly.*revenue': "SELECT strftime('%Y-%m', order_date) as month, SUM(total_amount) as revenue FROM orders WHERE status = 'completed' GROUP BY strftime('%Y-%m', order_date) ORDER BY month",
+                    'products.*low.*stock': "SELECT name, category, stock_quantity FROM products WHERE stock_quantity < 50 ORDER BY stock_quantity ASC",
+                    'best.*selling.*products': "SELECT p.name, p.category, COUNT(oi.id) as times_ordered FROM products p LEFT JOIN order_items oi ON p.id = oi.product_id GROUP BY p.id ORDER BY times_ordered DESC LIMIT 10",
+                    'products.*category': "SELECT category, COUNT(*) as product_count, AVG(price) as avg_price FROM products GROUP BY category"
+                },
+                hr: {
+                    'employees.*department': "SELECT department, COUNT(*) as employee_count, AVG(salary) as avg_salary FROM employees GROUP BY department",
+                    'highest.*paid.*employees': "SELECT name, department, position, salary FROM employees ORDER BY salary DESC LIMIT 5",
+                    'employees.*hired.*year': "SELECT strftime('%Y', hire_date) as year, COUNT(*) as hired_count FROM employees GROUP BY strftime('%Y', hire_date) ORDER BY year",
+                    'average.*salary': "SELECT AVG(salary) as average_salary FROM employees",
+                    'department.*budget': "SELECT d.name, d.budget, COUNT(e.id) as employee_count FROM departments d LEFT JOIN employees e ON d.name = e.department GROUP BY d.id ORDER BY d.budget DESC",
+                    'top.*departments.*employees': "SELECT department, COUNT(*) as employee_count FROM employees GROUP BY department ORDER BY employee_count DESC LIMIT 5"
+                },
+                finance: {
+                    'account.*balances': "SELECT account_number, account_type, balance FROM accounts ORDER BY balance DESC",
+                    'total.*balance': "SELECT SUM(balance) as total_balance FROM accounts",
+                    'transactions.*month': "SELECT COUNT(*) as transaction_count, SUM(ABS(amount)) as total_amount FROM transactions WHERE strftime('%Y-%m', transaction_date) = strftime('%Y-%m', 'now')",
+                    'recent.*transactions': "SELECT t.description, t.amount, t.transaction_date, a.account_number FROM transactions t JOIN accounts a ON t.account_id = a.id ORDER BY t.transaction_date DESC LIMIT 10",
+                    'account.*type': "SELECT account_type, COUNT(*) as account_count, AVG(balance) as avg_balance FROM accounts GROUP BY account_type",
+                    'largest.*transactions': "SELECT description, amount, transaction_date FROM transactions ORDER BY ABS(amount) DESC LIMIT 5",
+                    'total.*income': "SELECT SUM(amount) as total_income FROM transactions WHERE amount > 0",
+                    'total.*expenses': "SELECT SUM(ABS(amount)) as total_expenses FROM transactions WHERE amount < 0"
+                }
+            };
+            
+            // Check database-specific patterns
+            const currentPatterns = contextualPatterns[currentDatabase] || {};
+            for (const [pattern, sql] of Object.entries(currentPatterns)) {
                 if (new RegExp(pattern).test(lowerQuery)) {
                     return sql;
                 }
             }
             
-            // Fallback: try to generate basic queries
-            if (lowerQuery.includes('show') || lowerQuery.includes('list')) {
-                if (lowerQuery.includes('customer')) {
+            // Fallback: try to generate basic queries based on available tables
+            if (lowerQuery.includes('show') || lowerQuery.includes('list') || lowerQuery.includes('top')) {
+                if (availableTables.includes('customers') && lowerQuery.includes('customer')) {
                     return "SELECT * FROM customers LIMIT 10";
-                } else if (lowerQuery.includes('product')) {
+                } else if (availableTables.includes('products') && lowerQuery.includes('product')) {
                     return "SELECT * FROM products LIMIT 10";
-                } else if (lowerQuery.includes('order')) {
+                } else if (availableTables.includes('orders') && lowerQuery.includes('order')) {
                     return "SELECT * FROM orders LIMIT 10";
-                } else if (lowerQuery.includes('employee')) {
+                } else if (availableTables.includes('employees') && lowerQuery.includes('employee')) {
                     return "SELECT * FROM employees LIMIT 10";
-                } else if (lowerQuery.includes('account')) {
+                } else if (availableTables.includes('accounts') && lowerQuery.includes('account')) {
                     return "SELECT * FROM accounts LIMIT 10";
+                } else if (availableTables.includes('transactions') && lowerQuery.includes('transaction')) {
+                    return "SELECT * FROM transactions LIMIT 10";
+                } else if (availableTables.includes('departments') && lowerQuery.includes('department')) {
+                    return "SELECT * FROM departments LIMIT 10";
+                } else {
+                    // Return the first available table as fallback
+                    return `SELECT * FROM ${availableTables[0]} LIMIT 10`;
                 }
             }
             
-            // If no pattern matches, return a helpful error
+            // If no pattern matches, return a helpful error with available tables
             return null;
         }
 
@@ -494,7 +538,10 @@
             removeMessage(processingId);
             
             if (!sql) {
-                addChatMessage("I couldn't understand your query. Try asking about customers, products, orders, or use the examples above.", 'system');
+                const dbConfig = databases[currentDatabase];
+                const availableTables = Object.keys(dbConfig.tables);
+                const suggestions = availableTables.map(table => table.replace('_', ' ')).join(', ');
+                addChatMessage(`I couldn't understand your query for the ${dbConfig.name}. Try asking about: ${suggestions}. For example: "Show me all ${availableTables[0]}" or "List ${availableTables[1]}"`, 'system');
                 return;
             }
             
