@@ -40,7 +40,7 @@ def health_check():
     return jsonify({'status': 'healthy', 'service': 'TimeGPT Proxy'})
 
 if __name__ == '__main__':
-    print("🚀 Starting TimeGPT Proxy Server...")
-    print("📡 Frontend should call: http://localhost:8000/timegpt")
-    print("🔑 Using TimeGPT API key:", TIMEGPT_API_KEY[:15] + "...")
-    app.run(host='0.0.0.0', port=8000, debug=True)
+    print("Starting TimeGPT Proxy Server...")
+    print("Frontend should call: http://localhost:8000/timegpt")
+    print("Using TimeGPT API key:", TIMEGPT_API_KEY[:15] + "...")
+    app.run(host='0.0.0.0', port=8000, debug=False)
