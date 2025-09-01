@@ -678,6 +678,7 @@
 
                 if (response.ok) {
                     const result = await response.json();
+                    console.log('TimeGPT response:', JSON.stringify(result, null, 2).substring(0, 500) + '...');
                     return processForecastResult(result, data);
                 } else {
                     const errorText = await response.text();
@@ -700,26 +701,48 @@
 
         // Process TimeGPT forecast result
         function processForecastResult(result, historicalData) {
-            if (!result || !result.forecast) {
-                throw new Error('Invalid TimeGPT response format');
+            console.log('Processing TimeGPT result:', Object.keys(result));
+            
+            // TimeGPT returns different formats, try to handle them
+            let forecastData = [];
+            
+            if (result.data && Array.isArray(result.data)) {
+                // Format 1: {data: [{ds: "date", TimeGPT: value}, ...]}
+                forecastData = result.data.map(item => ({
+                    date: item.ds.split('T')[0],
+                    value: parseFloat(item.TimeGPT),
+                    isForecast: true
+                }));
+            } else if (result.forecast && Array.isArray(result.forecast)) {
+                // Format 2: {forecast: [value1, value2, ...]}
+                const lastDate = new Date(historicalData[historicalData.length - 1].date);
+                forecastData = result.forecast.map((value, index) => {
+                    const futureDate = new Date(lastDate);
+                    futureDate.setMonth(futureDate.getMonth() + (index + 1));
+                    return {
+                        date: futureDate.toISOString().split('T')[0],
+                        value: parseFloat(value),
+                        isForecast: true
+                    };
+                });
+            } else if (Array.isArray(result)) {
+                // Format 3: [{ds: "date", TimeGPT: value}, ...]
+                forecastData = result.map(item => ({
+                    date: item.ds.split('T')[0],
+                    value: parseFloat(item.TimeGPT),
+                    isForecast: true
+                }));
+            } else {
+                console.log('Unknown TimeGPT response format:', result);
+                throw new Error('Invalid TimeGPT response format - check console for details');
             }
-
-            const lastDate = new Date(historicalData[historicalData.length - 1].date);
-            const freq = detectFrequency(historicalData);
-            const increment = freq === 'M' ? 1 : 3; // Monthly or quarterly
-
-            return result.forecast.map((value, index) => {
-                const futureDate = new Date(lastDate);
-                futureDate.setMonth(futureDate.getMonth() + increment * (index + 1));
-                
-                return {
-                    date: futureDate.toISOString().split('T')[0],
-                    value: value,
-                    isForecast: true,
-                    confidence_low: result.lo_80 ? result.lo_80[index] : value * 0.9,
-                    confidence_high: result.hi_80 ? result.hi_80[index] : value * 1.1
-                };
-            });
+            
+            if (forecastData.length === 0) {
+                throw new Error('No forecast data found in TimeGPT response');
+            }
+            
+            console.log('Processed forecast:', forecastData.length, 'points');
+            return forecastData;
         }
 
         // Fallback forecasting (simple trend analysis)
