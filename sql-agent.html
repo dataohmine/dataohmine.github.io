@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Intelligence Agent - Natural Language to SQL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563EB',
+                        secondary: '#1E40AF',
+                        accent: '#3B82F6'
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-database text-white text-lg"></i>
+                        </div>
+                        <span class="text-xl font-semibold text-gray-900">SQL Intelligence Agent</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div id="dbStatus" class="flex items-center text-sm">
+                        <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                        <span class="text-green-600">Database Connected</span>
+                    </div>
+                    <a href="mailto:john.mfe@gmail.com" class="text-gray-600 hover:text-primary transition duration-200 hidden sm:inline-flex items-center">
+                        <i class="fas fa-envelope mr-2"></i>Contact
+                    </a>
+                    <a href="index.html" class="text-gray-600 hover:text-primary transition duration-200">← Back to Portfolio</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-4">SQL Intelligence Agent</h1>
+            <p class="text-xl text-gray-600">Ask questions in natural language and get real SQL results from a live database</p>
+        </div>
+
+        <!-- Database Selection & Schema -->
+        <div class="grid lg:grid-cols-3 gap-8 mb-8">
+            <!-- Database Selector -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Database</h2>
+                <select id="databaseSelect" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary mb-4" onchange="switchDatabase()">
+                    <option value="ecommerce">E-commerce Store</option>
+                    <option value="hr">HR Management</option>
+                    <option value="finance">Financial Records</option>
+                </select>
+                
+                <div class="bg-blue-50 p-3 rounded-lg">
+                    <p class="text-sm text-blue-800">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <span id="recordCount">Loading database...</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Schema Browser -->
+            <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Database Schema</h2>
+                <div id="schemaDisplay" class="bg-gray-50 rounded-lg p-4 font-mono text-sm space-y-2">
+                    <!-- Schema will be populated dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Interface -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold text-gray-900">Natural Language Query Interface</h2>
+                <button onclick="clearChat()" class="text-gray-500 hover:text-red-600 text-sm">
+                    <i class="fas fa-trash mr-1"></i>Clear Chat
+                </button>
+            </div>
+            
+            <div id="chatHistory" class="bg-gray-50 rounded-lg p-4 h-96 overflow-y-auto mb-4 space-y-4">
+                <div class="flex items-start space-x-2">
+                    <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-database text-white text-sm"></i>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg shadow-sm">
+                        <p class="text-sm text-gray-800">Welcome! I'm your SQL Intelligence Agent. Ask me questions about your data in plain English, and I'll convert them to SQL queries and show you the results. Try asking about customers, orders, products, or any other data in your database!</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex space-x-2">
+                <input 
+                    type="text" 
+                    id="queryInput" 
+                    placeholder="Ask about your data: 'Show me top 10 customers by total spent' or 'How many orders this month?'"
+                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    onkeypress="handleKeyPress(event)"
+                >
+                <button 
+                    onclick="processQuery()" 
+                    class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-secondary transition duration-300"
+                    id="queryButton"
+                >
+                    <i class="fas fa-search mr-2"></i>Query
+                </button>
+            </div>
+
+            <!-- Quick Examples -->
+            <div class="mt-4">
+                <p class="text-xs text-gray-500 mb-2">Quick examples:</p>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="askExample('Show me top 5 customers by total orders')" class="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-full transition">
+                        Top customers by orders
+                    </button>
+                    <button onclick="askExample('What is the average order value?')" class="text-xs bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded-full transition">
+                        Average order value
+                    </button>
+                    <button onclick="askExample('Show products with low stock')" class="text-xs bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-3 py-1 rounded-full transition">
+                        Products with low stock
+                    </button>
+                    <button onclick="askExample('Monthly revenue trend this year')" class="text-xs bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-1 rounded-full transition">
+                        Monthly revenue trend
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Query History -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Recent Queries</h2>
+            <div id="queryHistory" class="space-y-2">
+                <p class="text-gray-500 text-sm">Your recent queries will appear here...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let db = null;
+        let currentDatabase = 'ecommerce';
+        let queryHistory = [];
+
+        // Database schemas and sample data
+        const databases = {
+            ecommerce: {
+                name: "E-commerce Store",
+                tables: {
+                    customers: {
+                        schema: "CREATE TABLE customers (id INTEGER PRIMARY KEY, name TEXT, email TEXT, city TEXT, registration_date DATE, total_spent REAL)",
+                        data: [
+                            [1, 'John Smith', 'john@email.com', 'New York', '2023-01-15', 2450.00],
+                            [2, 'Sarah Johnson', 'sarah@email.com', 'Los Angeles', '2023-02-20', 3200.50],
+                            [3, 'Mike Chen', 'mike@email.com', 'Chicago', '2023-01-08', 1800.75],
+                            [4, 'Emily Davis', 'emily@email.com', 'Houston', '2023-03-10', 2900.00],
+                            [5, 'David Wilson', 'david@email.com', 'Phoenix', '2023-02-05', 1600.25],
+                            [6, 'Lisa Brown', 'lisa@email.com', 'Philadelphia', '2023-01-30', 4100.80],
+                            [7, 'Chris Martinez', 'chris@email.com', 'San Antonio', '2023-03-15', 2200.40],
+                            [8, 'Amanda Taylor', 'amanda@email.com', 'San Diego', '2023-02-12', 3500.60],
+                            [9, 'Ryan Anderson', 'ryan@email.com', 'Dallas', '2023-01-25', 1950.30],
+                            [10, 'Jessica White', 'jessica@email.com', 'San Jose', '2023-03-05', 2800.90]
+                        ]
+                    },
+                    products: {
+                        schema: "CREATE TABLE products (id INTEGER PRIMARY KEY, name TEXT, category TEXT, price REAL, stock_quantity INTEGER, supplier TEXT)",
+                        data: [
+                            [1, 'iPhone 14', 'Electronics', 999.99, 45, 'Apple Inc'],
+                            [2, 'Samsung Galaxy S23', 'Electronics', 899.99, 32, 'Samsung'],
+                            [3, 'MacBook Pro', 'Electronics', 1299.99, 18, 'Apple Inc'],
+                            [4, 'Dell XPS 13', 'Electronics', 1099.99, 25, 'Dell'],
+                            [5, 'Nike Air Max', 'Footwear', 120.00, 78, 'Nike'],
+                            [6, 'Adidas Ultraboost', 'Footwear', 150.00, 52, 'Adidas'],
+                            [7, 'Levi 501 Jeans', 'Clothing', 89.99, 95, 'Levi Strauss'],
+                            [8, 'North Face Jacket', 'Clothing', 199.99, 34, 'The North Face'],
+                            [9, 'Sony WH-1000XM4', 'Electronics', 349.99, 41, 'Sony'],
+                            [10, 'Kindle Paperwhite', 'Electronics', 139.99, 67, 'Amazon']
+                        ]
+                    },
+                    orders: {
+                        schema: "CREATE TABLE orders (id INTEGER PRIMARY KEY, customer_id INTEGER, order_date DATE, total_amount REAL, status TEXT, shipping_city TEXT)",
+                        data: [
+                            [1, 1, '2024-01-15', 1299.99, 'completed', 'New York'],
+                            [2, 2, '2024-01-16', 999.99, 'completed', 'Los Angeles'],
+                            [3, 3, '2024-01-17', 450.50, 'completed', 'Chicago'],
+                            [4, 1, '2024-01-18', 150.00, 'completed', 'New York'],
+                            [5, 4, '2024-01-19', 2100.00, 'processing', 'Houston'],
+                            [6, 2, '2024-01-20', 89.99, 'completed', 'Los Angeles'],
+                            [7, 5, '2024-01-21', 349.99, 'completed', 'Phoenix'],
+                            [8, 6, '2024-01-22', 1850.75, 'completed', 'Philadelphia'],
+                            [9, 3, '2024-01-23', 120.00, 'shipped', 'Chicago'],
+                            [10, 7, '2024-01-24', 199.99, 'completed', 'San Antonio']
+                        ]
+                    },
+                    order_items: {
+                        schema: "CREATE TABLE order_items (id INTEGER PRIMARY KEY, order_id INTEGER, product_id INTEGER, quantity INTEGER, unit_price REAL)",
+                        data: [
+                            [1, 1, 3, 1, 1299.99],
+                            [2, 2, 1, 1, 999.99],
+                            [3, 3, 9, 1, 349.99],
+                            [4, 3, 5, 1, 120.00],
+                            [5, 4, 6, 1, 150.00],
+                            [6, 5, 3, 1, 1299.99],
+                            [7, 5, 4, 1, 1099.99],
+                            [8, 6, 7, 1, 89.99],
+                            [9, 7, 9, 1, 349.99],
+                            [10, 8, 1, 1, 999.99]
+                        ]
+                    }
+                }
+            },
+            hr: {
+                name: "HR Management System",
+                tables: {
+                    employees: {
+                        schema: "CREATE TABLE employees (id INTEGER PRIMARY KEY, name TEXT, department TEXT, position TEXT, salary REAL, hire_date DATE, manager_id INTEGER)",
+                        data: [
+                            [1, 'Alice Johnson', 'Engineering', 'Senior Developer', 95000, '2022-03-15', null],
+                            [2, 'Bob Smith', 'Engineering', 'Junior Developer', 65000, '2023-06-01', 1],
+                            [3, 'Carol White', 'Marketing', 'Marketing Manager', 75000, '2022-01-10', null],
+                            [4, 'David Brown', 'Sales', 'Sales Representative', 55000, '2023-02-20', null],
+                            [5, 'Eva Davis', 'HR', 'HR Specialist', 60000, '2022-08-30', null],
+                            [6, 'Frank Wilson', 'Engineering', 'DevOps Engineer', 85000, '2023-04-12', 1],
+                            [7, 'Grace Taylor', 'Marketing', 'Content Creator', 50000, '2023-07-18', 3],
+                            [8, 'Henry Martinez', 'Sales', 'Sales Manager', 90000, '2021-11-05', null],
+                            [9, 'Iris Anderson', 'Finance', 'Accountant', 70000, '2022-09-14', null],
+                            [10, 'Jack Thomas', 'Engineering', 'QA Engineer', 72000, '2023-01-25', 1]
+                        ]
+                    },
+                    departments: {
+                        schema: "CREATE TABLE departments (id INTEGER PRIMARY KEY, name TEXT, budget REAL, head_id INTEGER)",
+                        data: [
+                            [1, 'Engineering', 500000, 1],
+                            [2, 'Marketing', 200000, 3],
+                            [3, 'Sales', 300000, 8],
+                            [4, 'HR', 150000, 5],
+                            [5, 'Finance', 180000, 9]
+                        ]
+                    }
+                }
+            },
+            finance: {
+                name: "Financial Records",
+                tables: {
+                    accounts: {
+                        schema: "CREATE TABLE accounts (id INTEGER PRIMARY KEY, account_number TEXT, account_type TEXT, balance REAL, created_date DATE)",
+                        data: [
+                            [1, '1001', 'Checking', 15000.50, '2023-01-15'],
+                            [2, '1002', 'Savings', 45000.00, '2023-01-20'],
+                            [3, '1003', 'Investment', 125000.75, '2023-02-01'],
+                            [4, '1004', 'Checking', 8500.25, '2023-02-10'],
+                            [5, '1005', 'Savings', 32000.00, '2023-03-01']
+                        ]
+                    },
+                    transactions: {
+                        schema: "CREATE TABLE transactions (id INTEGER PRIMARY KEY, account_id INTEGER, transaction_date DATE, amount REAL, description TEXT, type TEXT)",
+                        data: [
+                            [1, 1, '2024-01-15', -1200.00, 'Monthly Rent', 'debit'],
+                            [2, 1, '2024-01-16', 3500.00, 'Salary Deposit', 'credit'],
+                            [3, 2, '2024-01-17', 500.00, 'Transfer from Checking', 'credit'],
+                            [4, 3, '2024-01-18', 2000.00, 'Stock Dividend', 'credit'],
+                            [5, 1, '2024-01-19', -450.75, 'Grocery Shopping', 'debit'],
+                            [6, 4, '2024-01-20', -800.00, 'Car Payment', 'debit'],
+                            [7, 2, '2024-01-21', 1000.00, 'Interest Payment', 'credit'],
+                            [8, 3, '2024-01-22', -5000.00, 'Stock Purchase', 'debit'],
+                            [9, 1, '2024-01-23', -150.00, 'Utilities', 'debit'],
+                            [10, 5, '2024-01-24', 2500.00, 'Bonus Deposit', 'credit']
+                        ]
+                    }
+                }
+            }
+        };
+
+        // Natural Language to SQL conversion patterns
+        const sqlPatterns = {
+            // Customer queries
+            'top.*customers.*orders': "SELECT c.name, c.email, COUNT(o.id) as order_count FROM customers c LEFT JOIN orders o ON c.id = o.customer_id GROUP BY c.id, c.name, c.email ORDER BY order_count DESC LIMIT 5",
+            'top.*customers.*spent': "SELECT c.name, c.email, c.total_spent FROM customers c ORDER BY c.total_spent DESC LIMIT 5",
+            'customers.*city': "SELECT city, COUNT(*) as customer_count FROM customers GROUP BY city ORDER BY customer_count DESC",
+            
+            // Order queries
+            'average.*order.*value': "SELECT AVG(total_amount) as average_order_value FROM orders",
+            'total.*revenue': "SELECT SUM(total_amount) as total_revenue FROM orders WHERE status = 'completed'",
+            'orders.*month': "SELECT COUNT(*) as orders_this_month FROM orders WHERE strftime('%Y-%m', order_date) = strftime('%Y-%m', 'now')",
+            'monthly.*revenue': "SELECT strftime('%Y-%m', order_date) as month, SUM(total_amount) as revenue FROM orders WHERE status = 'completed' GROUP BY strftime('%Y-%m', order_date) ORDER BY month",
+            
+            // Product queries
+            'products.*low.*stock': "SELECT name, category, stock_quantity FROM products WHERE stock_quantity < 50 ORDER BY stock_quantity ASC",
+            'best.*selling.*products': "SELECT p.name, p.category, COUNT(oi.id) as times_ordered FROM products p LEFT JOIN order_items oi ON p.id = oi.product_id GROUP BY p.id ORDER BY times_ordered DESC LIMIT 10",
+            'products.*category': "SELECT category, COUNT(*) as product_count, AVG(price) as avg_price FROM products GROUP BY category",
+            
+            // Employee queries (for HR database)
+            'employees.*department': "SELECT department, COUNT(*) as employee_count, AVG(salary) as avg_salary FROM employees GROUP BY department",
+            'highest.*paid.*employees': "SELECT name, department, position, salary FROM employees ORDER BY salary DESC LIMIT 5",
+            'employees.*hired.*year': "SELECT strftime('%Y', hire_date) as year, COUNT(*) as hired_count FROM employees GROUP BY strftime('%Y', hire_date) ORDER BY year",
+            
+            // Finance queries
+            'account.*balances': "SELECT account_number, account_type, balance FROM accounts ORDER BY balance DESC",
+            'total.*balance': "SELECT SUM(balance) as total_balance FROM accounts",
+            'transactions.*month': "SELECT COUNT(*) as transaction_count, SUM(ABS(amount)) as total_amount FROM transactions WHERE strftime('%Y-%m', transaction_date) = strftime('%Y-%m', 'now')"
+        };
+
+        // Initialize SQL.js and create database
+        async function initDatabase() {
+            try {
+                const SQL = await initSqlJs({
+                    locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+                });
+                
+                db = new SQL.Database();
+                await loadDatabase(currentDatabase);
+                updateUI();
+                
+            } catch (error) {
+                console.error('Failed to initialize database:', error);
+                document.getElementById('dbStatus').innerHTML = `
+                    <div class="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+                    <span class="text-red-600">Database Error</span>
+                `;
+            }
+        }
+
+        // Load database schema and data
+        async function loadDatabase(dbName) {
+            const dbConfig = databases[dbName];
+            
+            // Drop existing tables
+            if (db) {
+                try {
+                    const tables = db.exec("SELECT name FROM sqlite_master WHERE type='table'");
+                    if (tables.length > 0) {
+                        tables[0].values.forEach(row => {
+                            db.exec(`DROP TABLE IF EXISTS ${row[0]}`);
+                        });
+                    }
+                } catch (e) {
+                    // Ignore errors when dropping tables
+                }
+            }
+
+            // Create tables and insert data
+            for (const [tableName, tableConfig] of Object.entries(dbConfig.tables)) {
+                // Create table
+                db.exec(tableConfig.schema);
+                
+                // Insert data
+                const columns = tableConfig.schema.match(/\(([^)]+)\)/)[1]
+                    .split(',')
+                    .map(col => col.trim().split(' ')[0])
+                    .filter(col => col !== 'PRIMARY');
+                
+                const placeholders = columns.map(() => '?').join(',');
+                const stmt = db.prepare(`INSERT INTO ${tableName} (${columns.join(',')}) VALUES (${placeholders})`);
+                
+                tableConfig.data.forEach(row => {
+                    stmt.run(row);
+                });
+                
+                stmt.free();
+            }
+        }
+
+        // Switch database
+        async function switchDatabase() {
+            const selector = document.getElementById('databaseSelect');
+            currentDatabase = selector.value;
+            await loadDatabase(currentDatabase);
+            updateUI();
+            clearChat();
+            
+            // Add welcome message for new database
+            addChatMessage(`Switched to ${databases[currentDatabase].name}. You can now ask questions about this database!`, 'system');
+        }
+
+        // Update UI elements
+        function updateUI() {
+            updateRecordCount();
+            updateSchemaDisplay();
+        }
+
+        // Update record count
+        function updateRecordCount() {
+            try {
+                const dbConfig = databases[currentDatabase];
+                let totalRecords = 0;
+                
+                for (const tableName of Object.keys(dbConfig.tables)) {
+                    const result = db.exec(`SELECT COUNT(*) FROM ${tableName}`);
+                    if (result.length > 0) {
+                        totalRecords += result[0].values[0][0];
+                    }
+                }
+                
+                document.getElementById('recordCount').textContent = 
+                    `${totalRecords} records across ${Object.keys(dbConfig.tables).length} tables`;
+            } catch (error) {
+                document.getElementById('recordCount').textContent = 'Error loading database';
+            }
+        }
+
+        // Update schema display
+        function updateSchemaDisplay() {
+            const dbConfig = databases[currentDatabase];
+            const schemaDisplay = document.getElementById('schemaDisplay');
+            
+            let schemaHtml = '';
+            for (const [tableName, tableConfig] of Object.entries(dbConfig.tables)) {
+                const columns = tableConfig.schema.match(/\(([^)]+)\)/)[1]
+                    .split(',')
+                    .map(col => col.trim())
+                    .join(', ');
+                
+                schemaHtml += `
+                    <div class="mb-2">
+                        <span class="font-bold text-blue-600">${tableName}</span>
+                        <br>
+                        <span class="text-gray-600 text-xs">${columns}</span>
+                    </div>
+                `;
+            }
+            
+            schemaDisplay.innerHTML = schemaHtml;
+        }
+
+        // Process natural language query
+        function processQuery() {
+            const input = document.getElementById('queryInput');
+            const query = input.value.trim();
+            
+            if (!query) return;
+            
+            addChatMessage(query, 'user');
+            input.value = '';
+            
+            // Show processing message
+            const processingId = addChatMessage('Processing your query...', 'system');
+            
+            setTimeout(() => {
+                const sql = convertToSQL(query);
+                executeQuery(sql, query, processingId);
+            }, 1000);
+        }
+
+        // Convert natural language to SQL
+        function convertToSQL(query) {
+            const lowerQuery = query.toLowerCase();
+            
+            // Check patterns
+            for (const [pattern, sql] of Object.entries(sqlPatterns)) {
+                if (new RegExp(pattern).test(lowerQuery)) {
+                    return sql;
+                }
+            }
+            
+            // Fallback: try to generate basic queries
+            if (lowerQuery.includes('show') || lowerQuery.includes('list')) {
+                if (lowerQuery.includes('customer')) {
+                    return "SELECT * FROM customers LIMIT 10";
+                } else if (lowerQuery.includes('product')) {
+                    return "SELECT * FROM products LIMIT 10";
+                } else if (lowerQuery.includes('order')) {
+                    return "SELECT * FROM orders LIMIT 10";
+                } else if (lowerQuery.includes('employee')) {
+                    return "SELECT * FROM employees LIMIT 10";
+                } else if (lowerQuery.includes('account')) {
+                    return "SELECT * FROM accounts LIMIT 10";
+                }
+            }
+            
+            // If no pattern matches, return a helpful error
+            return null;
+        }
+
+        // Execute SQL query
+        function executeQuery(sql, originalQuery, processingId) {
+            removeMessage(processingId);
+            
+            if (!sql) {
+                addChatMessage("I couldn't understand your query. Try asking about customers, products, orders, or use the examples above.", 'system');
+                return;
+            }
+            
+            try {
+                const result = db.exec(sql);
+                displayQueryResult(sql, result, originalQuery);
+                
+                // Add to history
+                queryHistory.unshift({
+                    query: originalQuery,
+                    sql: sql,
+                    timestamp: new Date().toLocaleTimeString(),
+                    resultCount: result.length > 0 ? result[0].values.length : 0
+                });
+                updateQueryHistory();
+                
+            } catch (error) {
+                addChatMessage(`SQL Error: ${error.message}`, 'system');
+                console.error('SQL execution error:', error);
+            }
+        }
+
+        // Display query result
+        function displayQueryResult(sql, result, originalQuery) {
+            let responseHtml = `
+                <div class="mb-3">
+                    <div class="text-sm font-semibold text-gray-700 mb-2">Generated SQL:</div>
+                    <div class="bg-gray-800 text-green-400 p-3 rounded font-mono text-xs overflow-x-auto">
+                        ${sql}
+                    </div>
+                </div>
+            `;
+            
+            if (result.length === 0) {
+                responseHtml += `<div class="text-yellow-600 text-sm">Query executed successfully but returned no results.</div>`;
+            } else {
+                const data = result[0];
+                responseHtml += `
+                    <div class="text-sm font-semibold text-gray-700 mb-2">Results (${data.values.length} rows):</div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-xs">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    ${data.columns.map(col => `<th class="px-2 py-1 text-left font-semibold">${col}</th>`).join('')}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.values.slice(0, 10).map(row => `
+                                    <tr class="border-b border-gray-200">
+                                        ${row.map(cell => `<td class="px-2 py-1">${cell}</td>`).join('')}
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                
+                if (data.values.length > 10) {
+                    responseHtml += `<div class="text-xs text-gray-500 mt-2">Showing first 10 of ${data.values.length} results</div>`;
+                }
+            }
+            
+            addChatMessage(responseHtml, 'assistant');
+        }
+
+        // Chat management functions
+        function addChatMessage(content, sender) {
+            const chatHistory = document.getElementById('chatHistory');
+            const messageId = 'msg-' + Date.now();
+            const messageDiv = document.createElement('div');
+            messageDiv.id = messageId;
+            messageDiv.className = 'flex items-start space-x-2';
+            
+            let icon, bgColor, textColor;
+            switch (sender) {
+                case 'user':
+                    icon = 'fas fa-user';
+                    bgColor = 'bg-primary';
+                    textColor = 'text-white';
+                    messageDiv.className += ' justify-end';
+                    break;
+                case 'assistant':
+                    icon = 'fas fa-database';
+                    bgColor = 'bg-white';
+                    textColor = 'text-gray-800';
+                    break;
+                case 'system':
+                    icon = 'fas fa-info-circle';
+                    bgColor = 'bg-yellow-50';
+                    textColor = 'text-yellow-800';
+                    break;
+            }
+            
+            messageDiv.innerHTML = `
+                ${sender === 'user' ? '' : `
+                    <div class="w-8 h-8 ${sender === 'assistant' ? 'bg-primary' : 'bg-yellow-500'} rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="${icon} text-white text-sm"></i>
+                    </div>
+                `}
+                <div class="${bgColor} p-3 rounded-lg shadow-sm ${sender === 'user' ? 'ml-auto' : ''} max-w-4xl">
+                    <div class="${textColor} text-sm">${content}</div>
+                </div>
+                ${sender === 'user' ? `
+                    <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="${icon} text-white text-sm"></i>
+                    </div>
+                ` : ''}
+            `;
+            
+            chatHistory.appendChild(messageDiv);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+            
+            return messageId;
+        }
+
+        function removeMessage(messageId) {
+            const message = document.getElementById(messageId);
+            if (message) {
+                message.remove();
+            }
+        }
+
+        function clearChat() {
+            const chatHistory = document.getElementById('chatHistory');
+            chatHistory.innerHTML = `
+                <div class="flex items-start space-x-2">
+                    <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-database text-white text-sm"></i>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg shadow-sm">
+                        <p class="text-sm text-gray-800">Chat cleared! Ready for new queries about your ${databases[currentDatabase].name}.</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Update query history
+        function updateQueryHistory() {
+            const historyDiv = document.getElementById('queryHistory');
+            
+            if (queryHistory.length === 0) {
+                historyDiv.innerHTML = '<p class="text-gray-500 text-sm">Your recent queries will appear here...</p>';
+                return;
+            }
+            
+            historyDiv.innerHTML = queryHistory.slice(0, 5).map(item => `
+                <div class="flex items-center justify-between p-2 bg-gray-50 rounded cursor-pointer hover:bg-gray-100" onclick="askExample('${item.query}')">
+                    <div>
+                        <div class="text-sm font-medium">${item.query}</div>
+                        <div class="text-xs text-gray-500">${item.timestamp} • ${item.resultCount} results</div>
+                    </div>
+                    <i class="fas fa-redo text-gray-400"></i>
+                </div>
+            `).join('');
+        }
+
+        // Utility functions
+        function askExample(query) {
+            document.getElementById('queryInput').value = query;
+            processQuery();
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                processQuery();
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initDatabase);
+    </script>
+</body>
+</html>
