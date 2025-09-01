@@ -209,52 +209,37 @@
         }
 
         async function loadKeysFromEnvFile() {
-            try {
-                const response = await fetch('git_api.env');
-                if (!response.ok) {
-                    throw new Error(`Failed to load git_api.env: ${response.status}`);
-                }
-                
-                const envContent = await response.text();
-                const envVars = parseEnvFile(envContent);
-                
-                // Store keys privately in localStorage (no UI display)
-                if (envVars.FRED_API_KEY) {
-                    localStorage.setItem('fred_api_key', envVars.FRED_API_KEY);
-                }
-                
-                if (envVars.NIXTLA_API_KEY) {
-                    localStorage.setItem('timegpt_api_key', envVars.NIXTLA_API_KEY);
-                }
-                
-                if (envVars.OPENAI_API_KEY) {
-                    localStorage.setItem('openai_api_key', envVars.OPENAI_API_KEY);
-                }
-                
-                addChatMessage('✅ API keys loaded successfully - all forecasting features available', 'ai');
-                console.log('Successfully loaded API keys from git_api.env');
-                
-            } catch (error) {
-                throw new Error(`Environment file error: ${error.message}`);
+            // Check if keys already exist in localStorage (user-provided)
+            const existingFred = localStorage.getItem('fred_api_key');
+            const existingTimeGPT = localStorage.getItem('timegpt_api_key');
+            const existingOpenAI = localStorage.getItem('openai_api_key');
+            
+            if (existingFred && existingTimeGPT && existingOpenAI) {
+                addChatMessage('✅ API keys found - all forecasting features available', 'ai');
+                return;
             }
+            
+            // Show configuration message for missing keys
+            let missingKeys = [];
+            if (!existingFred) missingKeys.push('FRED');
+            if (!existingTimeGPT) missingKeys.push('TimeGPT');
+            if (!existingOpenAI) missingKeys.push('OpenAI');
+            
+            const configMsg = `📋 **Demo Configuration**\n\nAPI keys needed for full functionality:\n${missingKeys.map(key => `• ${key} API key`).join('\n')}\n\n**Quick Setup (Browser Console):**\n\`setApiKeys('fred_key', 'timegpt_key', 'openai_key')\`\n\n*For production: use secure environment variables.*`;
+            
+            addChatMessage(configMsg, 'ai');
+            console.log('API keys not found - user configuration required');
         }
 
-        function parseEnvFile(content) {
-            const env = {};
-            const lines = content.split('\n');
+        // Helper function for browser console configuration
+        window.setApiKeys = function(fredKey, timegptKey, openaiKey) {
+            if (fredKey) localStorage.setItem('fred_api_key', fredKey);
+            if (timegptKey) localStorage.setItem('timegpt_api_key', timegptKey);
+            if (openaiKey) localStorage.setItem('openai_api_key', openaiKey);
             
-            for (const line of lines) {
-                const trimmedLine = line.trim();
-                if (trimmedLine && !trimmedLine.startsWith('#')) {
-                    const [key, value] = trimmedLine.split('=');
-                    if (key && value) {
-                        env[key.trim()] = value.trim();
-                    }
-                }
-            }
-            
-            return env;
-        }
+            console.log('API keys configured successfully');
+            location.reload(); // Refresh to load with new keys
+        };
 
         function updateStatusInfo(type, message) {
             const statusInfo = document.getElementById('statusInfo');
