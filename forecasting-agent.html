@@ -351,24 +351,107 @@
             
             try {
                 // FRED API endpoint
-                const url = `https://api.stlouisfed.org/fred/series/observations?series_id=${series}&api_key=${apiKey}&file_type=json&limit=1000&sort_order=desc`;
+                const fredUrl = `https://api.stlouisfed.org/fred/series/observations?series_id=${series}&api_key=${apiKey}&file_type=json&limit=100&sort_order=desc`;
                 
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`FRED API error: ${response.status}`);
+                // Try multiple approaches for CORS issues
+                let data = null;
                 
-                const data = await response.json();
+                try {
+                    // Approach 1: Direct fetch (works in some environments)
+                    const response = await fetch(fredUrl);
+                    if (response.ok) {
+                        data = await response.json();
+                    }
+                } catch (directError) {
+                    console.log('Direct FRED API failed:', directError.message);
+                    
+                    try {
+                        // Approach 2: Try with different CORS proxy
+                        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(fredUrl)}`;
+                        const proxyResponse = await fetch(proxyUrl);
+                        if (proxyResponse.ok) {
+                            const proxyData = await proxyResponse.json();
+                            data = JSON.parse(proxyData.contents);
+                        }
+                    } catch (proxyError) {
+                        console.log('Proxy FRED API failed:', proxyError.message);
+                        // Fall back to demo data
+                        data = generateDemoFredData(series);
+                        addChatMessage(`⚠️ Using demo data for ${series} (FRED API unavailable due to CORS restrictions in browser)`, 'ai');
+                    }
+                }
+                
+                if (!data) {
+                    throw new Error('Failed to fetch data from FRED API');
+                }
+                
+                if (data.error_code) {
+                    throw new Error(`FRED API: ${data.error_message || 'Unknown error'}`);
+                }
+                
                 currentData = processFredData(data, series);
+                
+                if (!currentData || currentData.length === 0) {
+                    throw new Error('No data returned for this series');
+                }
                 
                 updateDataPreview(currentData);
                 updateChart(currentData);
-                addChatMessage(`Loaded ${currentData.length} data points for ${series}. Ready for forecasting!`, 'ai');
+                addChatMessage(`✅ Loaded ${currentData.length} data points for ${series}. Ready for forecasting!`, 'ai');
                 
             } catch (error) {
                 console.error('FRED API error:', error);
-                addChatMessage(`Error loading FRED data: ${error.message}`, 'ai');
+                addChatMessage(`❌ Error loading FRED data: ${error.message}\n\n**Note:** Browser CORS restrictions may block FRED API. Using demo data for testing.`, 'ai');
+                
+                // Fallback to demo data
+                try {
+                    currentData = generateDemoFredData(series);
+                    updateDataPreview(currentData);
+                    updateChart(currentData);
+                    addChatMessage(`📊 Using demo ${series} data for testing. ${currentData.length} data points loaded.`, 'ai');
+                } catch (demoError) {
+                    addChatMessage(`❌ Failed to generate demo data: ${demoError.message}`, 'ai');
+                }
             } finally {
                 hideStatus();
             }
+        }
+
+        // Generate demo FRED data for testing when API is unavailable
+        function generateDemoFredData(series) {
+            const demoSeries = {
+                'UNRATE': { name: 'Unemployment Rate', baseValue: 4.0, volatility: 0.3 },
+                'GDP': { name: 'GDP', baseValue: 25000, volatility: 500 },
+                'CPIAUCSL': { name: 'Consumer Price Index', baseValue: 280, volatility: 5 },
+                'FEDFUNDS': { name: 'Federal Funds Rate', baseValue: 2.5, volatility: 0.5 },
+                'PAYEMS': { name: 'Total Nonfarm Payrolls', baseValue: 150000, volatility: 500 }
+            };
+            
+            const config = demoSeries[series] || { name: series, baseValue: 100, volatility: 5 };
+            const observations = [];
+            const startDate = new Date('2020-01-01');
+            
+            for (let i = 0; i < 48; i++) { // 4 years of monthly data
+                const date = new Date(startDate);
+                date.setMonth(startDate.getMonth() + i);
+                
+                // Generate realistic trend with some noise
+                const trend = config.baseValue + (Math.sin(i * 0.1) * config.volatility * 0.5);
+                const noise = (Math.random() - 0.5) * config.volatility;
+                const value = trend + noise;
+                
+                observations.push({
+                    date: date.toISOString().split('T')[0],
+                    value: Math.max(0, parseFloat(value.toFixed(2)))
+                });
+            }
+            
+            return {
+                observations: observations.map(obs => ({
+                    date: obs.date,
+                    value: obs.value.toString()
+                }))
+            };
         }
 
         // Process FRED data
