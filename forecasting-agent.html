@@ -1148,14 +1148,53 @@
             const typing = addChatMessage('Thinking...', 'ai');
             
             try {
-                // Parse forecast request
-                const forecastMatch = message.match(/forecast (\d+)([QqMm]?)\s*(.+)/i);
+                // Parse various forecast request patterns
+                let forecastMatch = null;
+                let periods = null;
+                let unit = 'q';
+                let subject = '';
                 
+                // Pattern 1: "forecast 8Q unemployment"
+                forecastMatch = message.match(/forecast (\d+)([QqMm]?)\s*(.+)/i);
                 if (forecastMatch) {
-                    const periods = parseInt(forecastMatch[1]);
-                    const unit = forecastMatch[2]?.toLowerCase() || 'q';
-                    const subject = forecastMatch[3];
-                    
+                    periods = parseInt(forecastMatch[1]);
+                    unit = forecastMatch[2]?.toLowerCase() || 'q';
+                    subject = forecastMatch[3];
+                }
+                
+                // Pattern 2: "predict next 4 quarters" or "next 12 months"
+                if (!forecastMatch) {
+                    forecastMatch = message.match(/(?:predict|forecast).*?(?:next|coming)\s+(\d+)\s+(quarter|month|q|m)/i);
+                    if (forecastMatch) {
+                        periods = parseInt(forecastMatch[1]);
+                        unit = forecastMatch[2].toLowerCase().startsWith('q') ? 'q' : 'm';
+                        // Extract subject from the message
+                        subject = message.match(/(GDP|unemployment|inflation|interest|rate|growth|CPI|employment)/i)?.[0] || 'economic indicator';
+                    }
+                }
+                
+                // Pattern 3: "analyze [subject] trends and predict"
+                if (!forecastMatch) {
+                    forecastMatch = message.match(/analyze\s+(.+?)\s+trends.*?predict.*?(\d+)\s*(quarter|month|q|m)/i);
+                    if (forecastMatch) {
+                        subject = forecastMatch[1];
+                        periods = parseInt(forecastMatch[2]);
+                        unit = forecastMatch[3].toLowerCase().startsWith('q') ? 'q' : 'm';
+                    }
+                }
+                
+                // Pattern 4: Generic forecast request with number
+                if (!forecastMatch) {
+                    forecastMatch = message.match(/(\d+)\s*(quarter|month|q|m).*?(GDP|unemployment|inflation|interest|rate|growth|CPI|employment|forecast)/i);
+                    if (forecastMatch) {
+                        periods = parseInt(forecastMatch[1]);
+                        unit = forecastMatch[2].toLowerCase().startsWith('q') ? 'q' : 'm';
+                        subject = forecastMatch[3] === 'forecast' ? 'economic indicator' : forecastMatch[3];
+                    }
+                }
+                
+                if (forecastMatch && periods) {
+                    console.log('Detected forecast request:', periods, unit, subject);
                     await handleForecastRequest(periods, unit, subject, typing);
                 } else {
                     // General AI response
