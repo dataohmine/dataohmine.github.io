@@ -188,8 +188,11 @@
         
         // Initialize
         document.addEventListener('DOMContentLoaded', async function() {
+            console.log('DOM loaded, initializing app...');
+            console.log('Chart.js available:', typeof Chart !== 'undefined');
             setupEventListeners();
             initializeChart();
+            console.log('Chart initialized, forecastChart:', forecastChart);
             await loadApiKeys();
             updateApiStatus();
         });
@@ -897,7 +900,14 @@
 
         // Chart Management
         function initializeChart() {
-            const ctx = document.getElementById('forecastChart').getContext('2d');
+            const canvas = document.getElementById('forecastChart');
+            if (!canvas) {
+                console.error('Chart canvas element not found!');
+                return;
+            }
+            
+            const ctx = canvas.getContext('2d');
+            console.log('Initializing chart with canvas:', canvas);
             
             forecastChart = new Chart(ctx, {
                 type: 'line',
@@ -934,7 +944,18 @@
         function updateChart(data, forecast = []) {
             if (!forecastChart || !data) {
                 console.log('Chart update skipped - missing chart or data');
-                return;
+                console.log('Attempting to reinitialize chart...');
+                
+                // Try to reinitialize chart if it's missing
+                if (!forecastChart && typeof Chart !== 'undefined') {
+                    initializeChart();
+                    if (!forecastChart) {
+                        console.error('Chart initialization failed');
+                        return;
+                    }
+                } else {
+                    return;
+                }
             }
 
             console.log('Updating chart with:', data.length, 'historical points,', forecast.length, 'forecast points');
