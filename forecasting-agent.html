@@ -755,13 +755,23 @@
                 result.timestamp.length === result.value.length) {
                 
                 console.log('Found TimeGPT format with timestamp/value arrays');
-                forecastData = result.timestamp.map((timestamp, index) => ({
-                    date: timestamp.split(' ')[0], // Extract date part from "2016-01-14 00:00:00"
-                    value: parseFloat(result.value[index]),
-                    isForecast: true
-                }));
+                
+                // Get the last historical date to continue from
+                const lastHistoricalDate = new Date(historicalData[historicalData.length - 1].date);
+                
+                // Generate forecast starting from the next period after last historical data
+                forecastData = result.value.map((value, index) => {
+                    const futureDate = new Date(lastHistoricalDate);
+                    futureDate.setMonth(futureDate.getMonth() + (index + 1)); // Start from next month
+                    return {
+                        date: futureDate.toISOString().split('T')[0],
+                        value: parseFloat(value),
+                        isForecast: true
+                    };
+                });
                 
                 console.log('Processed TimeGPT forecast:', forecastData.length, 'points');
+                console.log('Forecast starts from:', forecastData[0]?.date, 'after historical end:', lastHistoricalDate.toISOString().split('T')[0]);
                 return forecastData;
             }
             
@@ -788,11 +798,30 @@
                 // Handle array of forecast objects
                 if (dataSource[0] && typeof dataSource[0] === 'object' && dataSource[0].ds) {
                     // Format: [{ds: "date", TimeGPT: value}, ...]
-                    forecastData = dataSource.map(item => ({
-                        date: item.ds.split('T')[0],
-                        value: parseFloat(item.TimeGPT || item.timegpt || item.value),
-                        isForecast: true
-                    }));
+                    // Check if TimeGPT returned future dates or if we need to generate them
+                    const lastHistoricalDate = new Date(historicalData[historicalData.length - 1].date);
+                    const firstForecastDate = new Date(dataSource[0].ds);
+                    
+                    if (firstForecastDate <= lastHistoricalDate) {
+                        // TimeGPT returned overlapping dates, generate proper future dates
+                        console.log('TimeGPT returned overlapping dates, generating future dates from:', lastHistoricalDate.toISOString().split('T')[0]);
+                        forecastData = dataSource.map((item, index) => {
+                            const futureDate = new Date(lastHistoricalDate);
+                            futureDate.setMonth(futureDate.getMonth() + (index + 1));
+                            return {
+                                date: futureDate.toISOString().split('T')[0],
+                                value: parseFloat(item.TimeGPT || item.timegpt || item.value),
+                                isForecast: true
+                            };
+                        });
+                    } else {
+                        // TimeGPT returned proper future dates, use them as-is
+                        forecastData = dataSource.map(item => ({
+                            date: item.ds.split('T')[0],
+                            value: parseFloat(item.TimeGPT || item.timegpt || item.value),
+                            isForecast: true
+                        }));
+                    }
                 } else if (dataSource[0] && typeof dataSource[0] === 'number') {
                     // Format: [value1, value2, ...]
                     const lastDate = new Date(historicalData[historicalData.length - 1].date);
