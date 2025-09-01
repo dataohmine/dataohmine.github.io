@@ -64,99 +64,215 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         <!-- Header -->
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">Wildfire Risk Assessment Dashboard</h1>
-            <p class="text-gray-600">AI-powered wildfire prediction for Ventura County with real-time weather integration</p>
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">AI-Powered Wildfire Risk Assessment</h1>
+            <p class="text-gray-600">Real-time wildfire prediction and risk analysis for Ventura County with interactive zone monitoring</p>
         </div>
 
-        <!-- Current Risk Level -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <div class="lg:col-span-2">
-                <div class="bg-white rounded-xl shadow-lg p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-xl font-semibold text-gray-900">Current Risk Level</h2>
-                        <div class="text-sm text-gray-500" id="lastUpdated">Last updated: Just now</div>
+        <!-- AI Chat Assistant - Moved Higher for Better UX -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                    <i class="fas fa-robot text-primary mr-3"></i>AI Fire Safety Assistant
+                </h2>
+                <div class="flex space-x-2">
+                    <button onclick="askQuickQuestion('What is the current risk level?')" class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm hover:bg-blue-200 transition">Current Risk</button>
+                    <button onclick="askQuickQuestion('What should I do if I see smoke?')" class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm hover:bg-red-200 transition">Emergency</button>
+                    <button onclick="askQuickQuestion('How can I protect my home?')" class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm hover:bg-green-200 transition">Prevention</button>
+                </div>
+            </div>
+            
+            <div id="chatHistory" class="bg-gray-50 rounded-lg p-4 h-40 overflow-y-auto mb-4 space-y-2">
+                <div class="flex items-start space-x-2">
+                    <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-robot text-white text-sm"></i>
                     </div>
-                    
-                    <div class="text-center mb-6">
-                        <div id="riskMeter" class="relative w-48 h-48 mx-auto mb-4">
-                            <canvas id="riskGauge" width="192" height="192"></canvas>
-                            <div class="absolute inset-0 flex items-center justify-center">
-                                <div class="text-center">
-                                    <div id="riskScore" class="text-3xl font-bold">75</div>
-                                    <div id="riskLevel" class="text-lg font-semibold text-orange-600">HIGH</div>
-                                </div>
-                            </div>
-                        </div>
-                        <p id="riskDescription" class="text-gray-600">Elevated wildfire conditions detected. Exercise caution in high-risk areas.</p>
+                    <div class="bg-white p-3 rounded-lg shadow-sm flex-1">
+                        <p class="text-sm text-gray-800">Hello! I'm your AI wildfire safety assistant. I can provide real-time risk updates, emergency guidance, and prevention tips. What would you like to know?</p>
                     </div>
                 </div>
             </div>
+            
+            <div class="flex space-x-2">
+                <input 
+                    type="text" 
+                    id="chatInput" 
+                    placeholder="Ask about fire safety, current risks, or prevention tips..."
+                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    onkeypress="handleChatKeyPress(event)"
+                />
+                <button onclick="sendChatMessage()" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-secondary transition duration-300">
+                    <i class="fas fa-paper-plane mr-2"></i>Send
+                </button>
+            </div>
+        </div>
 
-            <!-- Weather Conditions -->
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Current Weather</h3>
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center">
-                            <i class="fas fa-thermometer-half text-red-500 mr-2"></i>
-                            <span class="text-gray-600">Temperature</span>
-                        </div>
-                        <span id="temperature" class="font-semibold">87°F</span>
+        <!-- Interactive ZIP Code Risk Grid - Enhanced Version -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                    <i class="fas fa-map-marked-alt text-primary mr-3"></i>Interactive Risk Zones - Ventura County
+                </h2>
+                <div class="flex items-center space-x-4 text-sm">
+                    <div class="flex items-center">
+                        <i class="fas fa-thermometer-half text-red-500 mr-1"></i>
+                        <span id="currentTemp">89°F</span>
                     </div>
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center">
-                            <i class="fas fa-tint text-blue-500 mr-2"></i>
-                            <span class="text-gray-600">Humidity</span>
-                        </div>
-                        <span id="humidity" class="font-semibold">15%</span>
+                    <div class="flex items-center">
+                        <i class="fas fa-wind text-gray-500 mr-1"></i>
+                        <span id="currentWind">18 mph</span>
                     </div>
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center">
-                            <i class="fas fa-wind text-gray-500 mr-2"></i>
-                            <span class="text-gray-600">Wind Speed</span>
-                        </div>
-                        <span id="windSpeed" class="font-semibold">25 mph</span>
+                    <div class="px-3 py-1 bg-orange-100 text-orange-800 rounded text-xs font-medium">
+                        FWI: <span id="fireWeatherIndex">82</span>/100
                     </div>
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center">
-                            <i class="fas fa-eye text-purple-500 mr-2"></i>
-                            <span class="text-gray-600">Visibility</span>
-                        </div>
-                        <span id="visibility" class="font-semibold">8 miles</span>
-                    </div>
+                    <div class="text-xs text-gray-500" id="lastUpdated">Updated: 2 min ago</div>
+                </div>
+            </div>
+            
+            <!-- ZIP Code Risk Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6" id="zipCodeGrid">
+                <!-- ZIP codes will be dynamically generated -->
+            </div>
+            
+            <!-- Risk Legend -->
+            <div class="flex items-center justify-center space-x-8 mt-6 text-sm border-t pt-4">
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-green-500 rounded-full mr-2"></div>
+                    <span>Low Risk (0-35)</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-yellow-500 rounded-full mr-2"></div>
+                    <span>Moderate (35-60)</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-orange-500 rounded-full mr-2"></div>
+                    <span>High (60-80)</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-red-500 rounded-full mr-2"></div>
+                    <span>Extreme (80+)</span>
+                </div>
+                <div class="flex items-center ml-8">
+                    <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse mr-2"></div>
+                    <span class="text-xs">Live Monitoring</span>
                 </div>
             </div>
         </div>
 
-        <!-- Risk Factors -->
+        <!-- Enhanced Real-Time Weather & Risk Factors -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+            <!-- Temperature -->
+            <div class="bg-white rounded-xl shadow-lg p-6 text-center relative overflow-hidden">
+                <div class="absolute top-2 right-2">
+                    <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                </div>
                 <div class="text-3xl mb-2">🌡️</div>
                 <h3 class="font-semibold text-gray-900 mb-2">Temperature</h3>
-                <div class="text-2xl font-bold text-red-600 mb-1" id="tempRisk">HIGH</div>
+                
+                <div class="mb-3">
+                    <div class="text-2xl font-bold text-red-600 mb-1" id="tempRisk">HIGH</div>
+                    <div class="text-lg text-gray-700" id="temperature">87°F</div>
+                </div>
+                
+                <!-- Animated Temperature Bar -->
+                <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                    <div class="bg-gradient-to-r from-blue-400 via-yellow-400 to-red-500 h-2 rounded-full transition-all duration-1000 ease-in-out" 
+                         id="tempProgress" style="width: 70%"></div>
+                </div>
+                
+                <div class="flex items-center justify-center text-xs text-gray-500 mb-1">
+                    <span id="tempTrend" class="flex items-center">
+                        <i class="fas fa-arrow-up text-red-500 mr-1"></i>Rising
+                    </span>
+                </div>
                 <p class="text-sm text-gray-600">Above 85°F increases risk</p>
             </div>
 
-            <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+            <!-- Humidity -->
+            <div class="bg-white rounded-xl shadow-lg p-6 text-center relative overflow-hidden">
+                <div class="absolute top-2 right-2">
+                    <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                </div>
                 <div class="text-3xl mb-2">💧</div>
                 <h3 class="font-semibold text-gray-900 mb-2">Humidity</h3>
-                <div class="text-2xl font-bold text-red-600 mb-1" id="humidityRisk">CRITICAL</div>
+                
+                <div class="mb-3">
+                    <div class="text-2xl font-bold text-red-600 mb-1" id="humidityRisk">CRITICAL</div>
+                    <div class="text-lg text-gray-700" id="humidity">15%</div>
+                </div>
+                
+                <!-- Animated Humidity Bar (inverted - lower is more dangerous) -->
+                <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                    <div class="bg-gradient-to-r from-red-500 via-orange-400 to-blue-500 h-2 rounded-full transition-all duration-1000 ease-in-out" 
+                         id="humidityProgress" style="width: 15%"></div>
+                </div>
+                
+                <div class="flex items-center justify-center text-xs text-red-500 mb-1">
+                    <span id="humidityTrend" class="flex items-center">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>Critical
+                    </span>
+                </div>
                 <p class="text-sm text-gray-600">Below 20% is dangerous</p>
             </div>
 
-            <div class="bg-white rounded-xl shadow-lg p-6 text-center">
-                <div class="text-3xl mb-2">💨</div>
+            <!-- Wind -->
+            <div class="bg-white rounded-xl shadow-lg p-6 text-center relative overflow-hidden">
+                <div class="absolute top-2 right-2">
+                    <div class="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                </div>
+                <div class="relative mb-2">
+                    <div class="text-3xl">💨</div>
+                    <div class="absolute top-0 right-4 text-sm">
+                        <i class="fas fa-location-arrow text-purple-600 transform rotate-45 animate-spin" 
+                           style="animation: spin 4s linear infinite;" id="windDirection"></i>
+                    </div>
+                </div>
                 <h3 class="font-semibold text-gray-900 mb-2">Wind</h3>
-                <div class="text-2xl font-bold text-orange-600 mb-1" id="windRisk">MODERATE</div>
+                
+                <div class="mb-3">
+                    <div class="text-2xl font-bold text-orange-600 mb-1" id="windRisk">MODERATE</div>
+                    <div class="text-lg text-gray-700" id="windSpeed">25 mph</div>
+                </div>
+                
+                <!-- Animated Wind Bar -->
+                <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                    <div class="bg-gradient-to-r from-green-400 via-yellow-400 to-red-500 h-2 rounded-full transition-all duration-1000 ease-in-out" 
+                         id="windProgress" style="width: 50%"></div>
+                </div>
+                
+                <div class="flex items-center justify-center text-xs text-gray-500 mb-1">
+                    <span id="windTrend" class="flex items-center">
+                        <i class="fas fa-compass text-purple-600 mr-1"></i>SW • Gusting
+                    </span>
+                </div>
                 <p class="text-sm text-gray-600">Speed and direction matter</p>
             </div>
 
-            <div class="bg-white rounded-xl shadow-lg p-6 text-center">
-                <div class="text-3xl mb-2">🌿</div>
-                <h3 class="font-semibold text-gray-900 mb-2">Vegetation</h3>
-                <div class="text-2xl font-bold text-orange-600 mb-1" id="vegRisk">MODERATE</div>
-                <p class="text-sm text-gray-600">Dry fuel load assessment</p>
+            <!-- Enhanced Vegetation with Fire Weather Index -->
+            <div class="bg-white rounded-xl shadow-lg p-6 text-center relative overflow-hidden">
+                <div class="absolute top-2 right-2">
+                    <div class="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                </div>
+                <div class="text-3xl mb-2">🔥</div>
+                <h3 class="font-semibold text-gray-900 mb-2">Fire Weather Index</h3>
+                
+                <div class="mb-3">
+                    <div class="text-2xl font-bold text-red-600 mb-1" id="fwiRisk">HIGH</div>
+                    <div class="text-lg text-gray-700" id="fwiValue">78/100</div>
+                </div>
+                
+                <!-- Animated FWI Bar -->
+                <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                    <div class="bg-gradient-to-r from-green-400 via-orange-400 to-red-500 h-2 rounded-full transition-all duration-1000 ease-in-out" 
+                         id="fwiProgress" style="width: 78%"></div>
+                </div>
+                
+                <div class="flex items-center justify-center text-xs text-red-500 mb-1">
+                    <span id="fwiTrend" class="flex items-center">
+                        <i class="fas fa-fire text-red-500 mr-1"></i>Elevated
+                    </span>
+                </div>
+                <p class="text-sm text-gray-600">Combined risk assessment</p>
             </div>
         </div>
 
@@ -254,58 +370,24 @@
             </div>
         </div>
 
-        <!-- AI Chat Assistant -->
-        <div class="bg-white rounded-xl shadow-lg p-6">
-            <div class="flex items-center mb-6">
-                <i class="fas fa-robot text-primary text-2xl mr-3"></i>
-                <h2 class="text-xl font-semibold text-gray-900">AI Fire Safety Assistant</h2>
-            </div>
-            
-            <div id="chatHistory" class="bg-gray-50 rounded-lg p-4 h-64 overflow-y-auto mb-4 space-y-2">
-                <div class="flex items-start space-x-2">
-                    <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-robot text-white text-sm"></i>
-                    </div>
-                    <div class="bg-white p-3 rounded-lg shadow-sm">
-                        <p class="text-sm text-gray-800">Hello! I'm your AI Fire Safety Assistant. I can help you understand current wildfire risks, provide safety recommendations, and answer questions about fire prevention. How can I help you today?</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="flex space-x-2">
-                <input 
-                    type="text" 
-                    id="chatInput" 
-                    placeholder="Ask about fire safety, current risks, or prevention tips..."
-                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    onkeypress="handleChatKeyPress(event)"
-                >
-                <button 
-                    onclick="sendChatMessage()" 
-                    class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-secondary transition duration-300"
-                >
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </div>
-            
-            <div class="mt-4">
-                <p class="text-xs text-gray-500 mb-2">Quick questions:</p>
-                <div class="flex flex-wrap gap-2">
-                    <button onclick="askQuickQuestion('What should I do if I see smoke?')" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-full transition">
-                        What should I do if I see smoke?
-                    </button>
-                    <button onclick="askQuickQuestion('How can I protect my home?')" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-full transition">
-                        How can I protect my home?
-                    </button>
-                    <button onclick="askQuickQuestion('Current evacuation routes?')" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-full transition">
-                        Current evacuation routes?
-                    </button>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script>
+        // Enhanced Ventura County ZIP code data with detailed risk analysis
+        const venturaZipCodes = [
+            { zipCode: '93001', name: 'Ventura', lat: 34.2697, lon: -119.2313, risk: 73, level: 'HIGH', temp: 89, humidity: 22, wind: 18 },
+            { zipCode: '93003', name: 'Ventura East', lat: 34.2566, lon: -119.2070, risk: 68, level: 'HIGH', temp: 87, humidity: 24, wind: 16 },
+            { zipCode: '93004', name: 'Ventura West', lat: 34.2775, lon: -119.2971, risk: 45, level: 'MODERATE', temp: 82, humidity: 35, wind: 12 },
+            { zipCode: '93010', name: 'Camarillo', lat: 34.2164, lon: -119.0376, risk: 62, level: 'HIGH', temp: 86, humidity: 28, wind: 14 },
+            { zipCode: '93021', name: 'Moorpark', lat: 34.2855, lon: -118.8826, risk: 55, level: 'MODERATE', temp: 84, humidity: 32, wind: 11 },
+            { zipCode: '93023', name: 'Ojai', lat: 34.4481, lon: -119.2429, risk: 81, level: 'EXTREME', temp: 92, humidity: 18, wind: 22 },
+            { zipCode: '93030', name: 'Oxnard', lat: 34.1975, lon: -119.1771, risk: 39, level: 'MODERATE', temp: 79, humidity: 42, wind: 9 },
+            { zipCode: '93063', name: 'Simi Valley', lat: 34.2694, lon: -118.7815, risk: 58, level: 'MODERATE', temp: 85, humidity: 30, wind: 13 },
+            { zipCode: '91361', name: 'Thousand Oaks', lat: 34.1706, lon: -118.8375, risk: 51, level: 'MODERATE', temp: 83, humidity: 33, wind: 10 },
+        ];
+        
+        let selectedZipCode = '';
+
         // Simulated real-time data
         let currentRiskScore = 75;
         let weatherData = {
@@ -314,6 +396,123 @@
             windSpeed: 25,
             visibility: 8
         };
+        
+        // Enhanced risk color function
+        function getRiskColor(riskLevel) {
+            if (riskLevel >= 80) return '#DC2626'; // Red - Extreme
+            if (riskLevel >= 60) return '#EA580C'; // Orange - High  
+            if (riskLevel >= 35) return '#CA8A04'; // Yellow - Moderate
+            return '#16A34A'; // Green - Low
+        }
+        
+        // Populate ZIP code grid
+        function populateZipCodeGrid() {
+            const gridContainer = document.getElementById('zipCodeGrid');
+            if (!gridContainer) return;
+            
+            gridContainer.innerHTML = '';
+            
+            venturaZipCodes.forEach((zip, index) => {
+                const zipCard = document.createElement('div');
+                zipCard.className = `
+                    relative bg-white rounded-lg shadow-lg p-4 cursor-pointer transition-all duration-300 hover:scale-105 border-2
+                    ${selectedZipCode === zip.zipCode ? 'ring-4 ring-blue-500 shadow-2xl border-blue-300' : 'hover:shadow-xl border-transparent'}
+                `;
+                zipCard.style.borderTop = `4px solid ${getRiskColor(zip.risk)}`;
+                zipCard.onclick = () => selectZipCode(zip.zipCode);
+                
+                zipCard.innerHTML = `
+                    <!-- Risk Level Indicator -->
+                    <div
+                        class="absolute top-2 right-2 w-6 h-6 rounded-full opacity-80"
+                        style="background-color: ${getRiskColor(zip.risk)}"
+                        title="${zip.level} Risk"
+                    ></div>
+
+                    <!-- ZIP Code Info -->
+                    <div class="mb-3">
+                        <div class="font-bold text-lg text-gray-900">${zip.zipCode}</div>
+                        <div class="text-sm text-gray-600">${zip.name}</div>
+                    </div>
+
+                    <!-- Risk Score -->
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-gray-500">Risk Score</span>
+                            <span class="font-bold text-lg" style="color: ${getRiskColor(zip.risk)}">
+                                ${zip.risk}/100
+                            </span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                            <div
+                                class="h-2 rounded-full transition-all duration-500"
+                                style="
+                                    width: ${zip.risk}%;
+                                    background-color: ${getRiskColor(zip.risk)}
+                                "
+                            ></div>
+                        </div>
+                    </div>
+
+                    <!-- Weather Conditions -->
+                    <div class="space-y-2 text-xs text-gray-600">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-thermometer-half text-red-500 mr-1 text-xs"></i>
+                                <span>Temp</span>
+                            </div>
+                            <span>${zip.temp}°F</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="w-2 h-2 bg-blue-500 rounded-full mr-1"></div>
+                                <span>Humidity</span>
+                            </div>
+                            <span>${zip.humidity}%</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-wind text-gray-500 mr-1 text-xs"></i>
+                                <span>Wind</span>
+                            </div>
+                            <span>${zip.wind} mph</span>
+                        </div>
+                    </div>
+
+                    <!-- Risk Level Badge -->
+                    <div class="
+                        absolute bottom-2 right-2 px-2 py-1 rounded text-xs font-medium
+                        ${zip.level === 'EXTREME' ? 'bg-red-100 text-red-800' :
+                          zip.level === 'HIGH' ? 'bg-orange-100 text-orange-800' :
+                          zip.level === 'MODERATE' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-green-100 text-green-800'}
+                    ">
+                        ${zip.level}
+                    </div>
+                `;
+                
+                gridContainer.appendChild(zipCard);
+            });
+        }
+        
+        // Select ZIP code function
+        function selectZipCode(zipCode) {
+            selectedZipCode = zipCode;
+            const selectedZip = venturaZipCodes.find(zip => zip.zipCode === zipCode);
+            
+            if (selectedZip) {
+                // Update header weather data to show selected ZIP's data
+                document.getElementById('currentTemp').textContent = `${selectedZip.temp}°F`;
+                document.getElementById('currentWind').textContent = `${selectedZip.wind} mph`;
+                
+                // Show selected ZIP details in chat
+                const detailMessage = `Selected ${selectedZip.name} (${selectedZip.zipCode}): ${selectedZip.level} risk (${selectedZip.risk}/100). Current conditions: ${selectedZip.temp}°F, ${selectedZip.humidity}% humidity, ${selectedZip.wind} mph winds.`;
+                addChatMessage(detailMessage, 'ai');
+            }
+            
+            // Re-render grid to show selection
+            populateZipCodeGrid();
+        }
 
         // Initialize dashboard
         function initializeDashboard() {
@@ -321,6 +520,7 @@
             updateWeatherData();
             updateRiskFactors();
             createRiskChart();
+            populateZipCodeGrid();
             
             // Show alert if risk is high
             if (currentRiskScore >= 70) {
@@ -384,30 +584,290 @@
             document.getElementById('riskDescription').textContent = riskDescription;
         }
 
-        // Update weather data
+        // Enhanced weather data update with animations
         function updateWeatherData() {
-            document.getElementById('temperature').textContent = weatherData.temperature + '°F';
-            document.getElementById('humidity').textContent = weatherData.humidity + '%';
-            document.getElementById('windSpeed').textContent = weatherData.windSpeed + ' mph';
-            document.getElementById('visibility').textContent = weatherData.visibility + ' miles';
+            // Update temperature
+            const temp = weatherData.temperature;
+            document.getElementById('temperature').textContent = temp + '°F';
+            
+            // Update temperature progress bar (scaled from 60-110°F range)
+            const tempProgress = Math.min(100, Math.max(0, ((temp - 60) / 50) * 100));
+            document.getElementById('tempProgress').style.width = tempProgress + '%';
+            
+            // Update humidity
+            const humidity = weatherData.humidity;
+            document.getElementById('humidity').textContent = humidity + '%';
+            document.getElementById('humidityProgress').style.width = humidity + '%';
+            
+            // Update wind speed
+            const windSpeed = weatherData.windSpeed;
+            document.getElementById('windSpeed').textContent = windSpeed + ' mph';
+            
+            // Update wind progress bar (scaled to 50 mph max)
+            const windProgress = Math.min(100, (windSpeed / 50) * 100);
+            document.getElementById('windProgress').style.width = windProgress + '%';
+            
+            // Update Fire Weather Index
+            const fwi = Math.round(currentRiskScore * 1.2); // Convert risk score to FWI scale
+            document.getElementById('fwiValue').textContent = Math.min(100, fwi) + '/100';
+            document.getElementById('fwiProgress').style.width = Math.min(100, fwi) + '%';
+            
+            // Update trends and direction indicators
+            updateWeatherTrends(temp, humidity, windSpeed);
+            
+            // Legacy visibility update if element exists
+            const visibilityEl = document.getElementById('visibility');
+            if (visibilityEl) {
+                visibilityEl.textContent = weatherData.visibility + ' miles';
+            }
+        }
+        
+        // Update weather trend indicators
+        function updateWeatherTrends(temp, humidity, windSpeed) {
+            // Temperature trend
+            const tempTrend = document.getElementById('tempTrend');
+            if (temp > 85) {
+                tempTrend.innerHTML = '<i class="fas fa-arrow-up text-red-500 mr-1"></i>Rising - Critical';
+                tempTrend.className = 'flex items-center text-red-500';
+            } else if (temp > 75) {
+                tempTrend.innerHTML = '<i class="fas fa-arrow-up text-orange-500 mr-1"></i>Elevated';
+                tempTrend.className = 'flex items-center text-orange-500';
+            } else {
+                tempTrend.innerHTML = '<i class="fas fa-thermometer-empty text-green-500 mr-1"></i>Normal';
+                tempTrend.className = 'flex items-center text-green-500';
+            }
+            
+            // Humidity trend
+            const humidityTrend = document.getElementById('humidityTrend');
+            if (humidity < 20) {
+                humidityTrend.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500 mr-1"></i>Critical';
+                humidityTrend.className = 'flex items-center text-red-500';
+            } else if (humidity < 40) {
+                humidityTrend.innerHTML = '<i class="fas fa-exclamation text-orange-500 mr-1"></i>Low';
+                humidityTrend.className = 'flex items-center text-orange-500';
+            } else {
+                humidityTrend.innerHTML = '<i class="fas fa-check text-green-500 mr-1"></i>Adequate';
+                humidityTrend.className = 'flex items-center text-green-500';
+            }
+            
+            // Wind trend with direction
+            const windTrend = document.getElementById('windTrend');
+            const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+            const windDir = directions[Math.floor(Math.random() * 8)]; // Simulated wind direction
+            
+            if (windSpeed > 25) {
+                windTrend.innerHTML = `<i class="fas fa-wind text-red-500 mr-1"></i>${windDir} • High`;
+                windTrend.className = 'flex items-center text-red-500';
+            } else if (windSpeed > 15) {
+                windTrend.innerHTML = `<i class="fas fa-compass text-orange-500 mr-1"></i>${windDir} • Moderate`;
+                windTrend.className = 'flex items-center text-orange-500';
+            } else {
+                windTrend.innerHTML = `<i class="fas fa-leaf text-green-500 mr-1"></i>${windDir} • Light`;
+                windTrend.className = 'flex items-center text-green-500';
+            }
+            
+            // Update spinning wind direction indicator
+            const windDirectionEl = document.getElementById('windDirection');
+            const rotation = Math.floor(Math.random() * 360);
+            windDirectionEl.style.transform = `rotate(${rotation}deg)`;
+            
+            // Fire Weather Index trend
+            const fwiTrend = document.getElementById('fwiTrend');
+            const fwi = Math.round(currentRiskScore * 1.2);
+            
+            if (fwi > 80) {
+                fwiTrend.innerHTML = '<i class="fas fa-fire text-red-500 mr-1"></i>Extreme';
+                fwiTrend.className = 'flex items-center text-red-500';
+            } else if (fwi > 60) {
+                fwiTrend.innerHTML = '<i class="fas fa-flame text-orange-500 mr-1"></i>High';
+                fwiTrend.className = 'flex items-center text-orange-500';
+            } else if (fwi > 40) {
+                fwiTrend.innerHTML = '<i class="fas fa-fire-alt text-yellow-500 mr-1"></i>Moderate';
+                fwiTrend.className = 'flex items-center text-yellow-500';
+            } else {
+                fwiTrend.innerHTML = '<i class="fas fa-check-circle text-green-500 mr-1"></i>Low';
+                fwiTrend.className = 'flex items-center text-green-500';
+            }
         }
 
-        // Update risk factors
+        // Enhanced risk factors with advanced color coding
         function updateRiskFactors() {
-            // Temperature risk
-            const tempRisk = weatherData.temperature > 85 ? 'HIGH' : weatherData.temperature > 75 ? 'MODERATE' : 'LOW';
-            document.getElementById('tempRisk').textContent = tempRisk;
-            document.getElementById('tempRisk').className = `text-2xl font-bold mb-1 ${tempRisk === 'HIGH' ? 'text-red-600' : tempRisk === 'MODERATE' ? 'text-orange-600' : 'text-green-600'}`;
-
-            // Humidity risk
-            const humidityRisk = weatherData.humidity < 20 ? 'CRITICAL' : weatherData.humidity < 40 ? 'HIGH' : 'MODERATE';
-            document.getElementById('humidityRisk').textContent = humidityRisk;
-            document.getElementById('humidityRisk').className = `text-2xl font-bold mb-1 ${humidityRisk === 'CRITICAL' ? 'text-red-600' : humidityRisk === 'HIGH' ? 'text-red-600' : 'text-orange-600'}`;
-
-            // Wind risk
-            const windRisk = weatherData.windSpeed > 30 ? 'HIGH' : weatherData.windSpeed > 15 ? 'MODERATE' : 'LOW';
-            document.getElementById('windRisk').textContent = windRisk;
-            document.getElementById('windRisk').className = `text-2xl font-bold mb-1 ${windRisk === 'HIGH' ? 'text-red-600' : windRisk === 'MODERATE' ? 'text-orange-600' : 'text-green-600'}`;
+            const temp = weatherData.temperature;
+            const humidity = weatherData.humidity;
+            const windSpeed = weatherData.windSpeed;
+            const fwi = Math.min(100, Math.round(currentRiskScore * 1.2));
+            
+            // Temperature risk assessment
+            let tempRisk, tempColor, tempBgColor;
+            if (temp > 95) {
+                tempRisk = 'EXTREME';
+                tempColor = 'text-red-800';
+                tempBgColor = 'bg-red-100 border-red-200';
+            } else if (temp > 85) {
+                tempRisk = 'HIGH';
+                tempColor = 'text-red-600';
+                tempBgColor = 'bg-red-50 border-red-200';
+            } else if (temp > 75) {
+                tempRisk = 'MODERATE';
+                tempColor = 'text-orange-600';
+                tempBgColor = 'bg-orange-50 border-orange-200';
+            } else {
+                tempRisk = 'LOW';
+                tempColor = 'text-green-600';
+                tempBgColor = 'bg-green-50 border-green-200';
+            }
+            
+            // Humidity risk assessment (lower humidity = higher risk)
+            let humidityRisk, humidityColor, humidityBgColor;
+            if (humidity < 15) {
+                humidityRisk = 'EXTREME';
+                humidityColor = 'text-red-800';
+                humidityBgColor = 'bg-red-100 border-red-200';
+            } else if (humidity < 25) {
+                humidityRisk = 'CRITICAL';
+                humidityColor = 'text-red-600';
+                humidityBgColor = 'bg-red-50 border-red-200';
+            } else if (humidity < 40) {
+                humidityRisk = 'HIGH';
+                humidityColor = 'text-orange-600';
+                humidityBgColor = 'bg-orange-50 border-orange-200';
+            } else {
+                humidityRisk = 'MODERATE';
+                humidityColor = 'text-yellow-600';
+                humidityBgColor = 'bg-yellow-50 border-yellow-200';
+            }
+            
+            // Wind risk assessment
+            let windRisk, windColor, windBgColor;
+            if (windSpeed > 35) {
+                windRisk = 'EXTREME';
+                windColor = 'text-red-800';
+                windBgColor = 'bg-red-100 border-red-200';
+            } else if (windSpeed > 25) {
+                windRisk = 'HIGH';
+                windColor = 'text-red-600';
+                windBgColor = 'bg-red-50 border-red-200';
+            } else if (windSpeed > 15) {
+                windRisk = 'MODERATE';
+                windColor = 'text-orange-600';
+                windBgColor = 'bg-orange-50 border-orange-200';
+            } else {
+                windRisk = 'LOW';
+                windColor = 'text-green-600';
+                windBgColor = 'bg-green-50 border-green-200';
+            }
+            
+            // Fire Weather Index risk assessment
+            let fwiRisk, fwiColor, fwiBgColor;
+            if (fwi > 85) {
+                fwiRisk = 'EXTREME';
+                fwiColor = 'text-red-800';
+                fwiBgColor = 'bg-red-100 border-red-200';
+            } else if (fwi > 70) {
+                fwiRisk = 'HIGH';
+                fwiColor = 'text-red-600';
+                fwiBgColor = 'bg-red-50 border-red-200';
+            } else if (fwi > 50) {
+                fwiRisk = 'MODERATE';
+                fwiColor = 'text-orange-600';
+                fwiBgColor = 'bg-orange-50 border-orange-200';
+            } else {
+                fwiRisk = 'LOW';
+                fwiColor = 'text-green-600';
+                fwiBgColor = 'bg-green-50 border-green-200';
+            }
+            
+            // Update risk labels and colors
+            const tempRiskEl = document.getElementById('tempRisk');
+            if (tempRiskEl) {
+                tempRiskEl.textContent = tempRisk;
+                tempRiskEl.className = `text-2xl font-bold mb-1 ${tempColor}`;
+                
+                // Add visual glow effect for high risk
+                if (tempRisk === 'EXTREME' || tempRisk === 'HIGH') {
+                    tempRiskEl.parentElement.parentElement.classList.add('ring-2', 'ring-red-200', 'shadow-lg');
+                } else {
+                    tempRiskEl.parentElement.parentElement.classList.remove('ring-2', 'ring-red-200', 'shadow-lg');
+                }
+            }
+            
+            const humidityRiskEl = document.getElementById('humidityRisk');
+            if (humidityRiskEl) {
+                humidityRiskEl.textContent = humidityRisk;
+                humidityRiskEl.className = `text-2xl font-bold mb-1 ${humidityColor}`;
+                
+                // Add visual emphasis for critical humidity
+                if (humidityRisk === 'EXTREME' || humidityRisk === 'CRITICAL') {
+                    humidityRiskEl.parentElement.parentElement.classList.add('ring-2', 'ring-red-200', 'shadow-lg');
+                } else {
+                    humidityRiskEl.parentElement.parentElement.classList.remove('ring-2', 'ring-red-200', 'shadow-lg');
+                }
+            }
+            
+            const windRiskEl = document.getElementById('windRisk');
+            if (windRiskEl) {
+                windRiskEl.textContent = windRisk;
+                windRiskEl.className = `text-2xl font-bold mb-1 ${windColor}`;
+                
+                // Add visual emphasis for high wind risk
+                if (windRisk === 'EXTREME' || windRisk === 'HIGH') {
+                    windRiskEl.parentElement.parentElement.classList.add('ring-2', 'ring-orange-200', 'shadow-lg');
+                } else {
+                    windRiskEl.parentElement.parentElement.classList.remove('ring-2', 'ring-orange-200', 'shadow-lg');
+                }
+            }
+            
+            const fwiRiskEl = document.getElementById('fwiRisk');
+            if (fwiRiskEl) {
+                fwiRiskEl.textContent = fwiRisk;
+                fwiRiskEl.className = `text-2xl font-bold mb-1 ${fwiColor}`;
+                
+                // Add visual emphasis for high FWI risk
+                if (fwiRisk === 'EXTREME' || fwiRisk === 'HIGH') {
+                    fwiRiskEl.parentElement.parentElement.classList.add('ring-2', 'ring-red-200', 'shadow-lg');
+                } else {
+                    fwiRiskEl.parentElement.parentElement.classList.remove('ring-2', 'ring-red-200', 'shadow-lg');
+                }
+            }
+            
+            // Update overall page styling based on highest risk level
+            updateOverallRiskStyling(tempRisk, humidityRisk, windRisk, fwiRisk);
+        }
+        
+        // Update overall page styling based on risk levels
+        function updateOverallRiskStyling(tempRisk, humidityRisk, windRisk, fwiRisk) {
+            const risks = [tempRisk, humidityRisk, windRisk, fwiRisk];
+            const hasExtreme = risks.includes('EXTREME');
+            const hasCritical = risks.includes('CRITICAL') || risks.includes('HIGH');
+            
+            const body = document.body;
+            const header = document.querySelector('header');
+            
+            // Reset classes
+            body.classList.remove('bg-red-25', 'bg-orange-25', 'bg-yellow-25');
+            
+            // Apply overall theme based on highest risk
+            if (hasExtreme) {
+                body.classList.add('bg-red-25');
+                if (header) {
+                    header.style.background = 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)';
+                }
+                
+                // Add pulsing effect to high-risk elements
+                const pulsingElements = document.querySelectorAll('.ring-2');
+                pulsingElements.forEach(el => {
+                    el.style.animation = 'pulse 2s infinite';
+                });
+            } else if (hasCritical) {
+                body.classList.add('bg-orange-25');
+                if (header) {
+                    header.style.background = 'linear-gradient(135deg, #fed7aa 0%, #fdba74 100%)';
+                }
+            } else {
+                if (header) {
+                    header.style.background = 'linear-gradient(135deg, #3B82F6, #1E40AF)';
+                }
+            }
         }
 
         // Create risk trend chart
@@ -601,20 +1061,101 @@
         function generateAIResponse(userMessage) {
             const message = userMessage.toLowerCase();
             
+            // Get current selected ZIP data for context
+            const selectedZip = selectedZipCode ? venturaZipCodes.find(zip => zip.zipCode === selectedZipCode) : null;
+            const contextualData = selectedZip || { risk: currentRiskScore, temp: weatherData.temperature, humidity: weatherData.humidity, wind: weatherData.windSpeed };
+            
+            // Advanced risk assessment logic
+            const analyzeRiskFactors = () => {
+                const factors = [];
+                if (contextualData.temp > 85) factors.push(`High temperature (${contextualData.temp}°F) increases fire danger`);
+                if (contextualData.humidity < 30) factors.push(`Low humidity (${contextualData.humidity}%) creates dry conditions`);
+                if (contextualData.wind > 15) factors.push(`Strong winds (${contextualData.wind} mph) accelerate fire spread`);
+                if (contextualData.risk > 70) factors.push(`Critical fire weather conditions detected`);
+                return factors;
+            };
+
+            const getEvacuationAdvice = (windSpeed, windDirection = 270) => {
+                const windDir = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.floor(windDirection / 45) % 8];
+                let advice = "Evacuation recommendations: ";
+                if (windSpeed > 25) {
+                    advice += `⚠️ HIGH WIND WARNING: Avoid traveling ${windDir} due to wind patterns. `;
+                }
+                advice += "Use Highway 101 (primary), Highway 126 (east backup), or Highway 33 (north backup). Monitor road closures actively.";
+                return advice;
+            };
+            
             if (message.includes('smoke') || message.includes('fire')) {
-                return "If you see smoke or fire: 1) Call 911 immediately, 2) Evacuate if safe to do so, 3) Follow your predetermined evacuation route, 4) Stay low to avoid smoke inhalation. Never ignore signs of fire.";
+                const urgentAdvice = "🚨 IMMEDIATE ACTION REQUIRED:\n1) Call 911 now\n2) Evacuate immediately if safe\n3) Stay low, cover nose/mouth\n4) Don't stop to gather belongings\n5) Follow predetermined evacuation route";
+                return selectedZip ? `${urgentAdvice}\n\nFor ${selectedZip.name} area: ${getEvacuationAdvice(selectedZip.wind)}` : urgentAdvice;
+                
             } else if (message.includes('protect') || message.includes('home')) {
-                return "To protect your home: Create defensible space (30+ feet clearance), use fire-resistant materials, maintain gutters, install sprinklers, trim trees away from structures, and have an emergency plan ready.";
+                const riskFactors = analyzeRiskFactors();
+                let advice = "🏠 HOME PROTECTION STRATEGY:\n• Create 30+ ft defensible space\n• Use fire-resistant materials\n• Clear gutters regularly\n• Install ember-resistant vents";
+                if (riskFactors.length > 0) {
+                    advice += `\n\n⚠️ CURRENT CONCERNS: ${riskFactors.join(', ')}`;
+                    advice += "\n• Consider additional preparations given current conditions";
+                }
+                return advice;
+                
             } else if (message.includes('evacuation') || message.includes('route')) {
-                return "Current evacuation routes: Highway 101 (north/south), Highway 126 (east), Highway 33 (north). Monitor local emergency alerts for closures. Always have multiple routes planned and practice them with your family.";
+                return getEvacuationAdvice(contextualData.wind) + "\n\n📍 PLAN MULTIPLE ROUTES: Always have 2-3 exit strategies. Practice routes with your family. Keep vehicles fueled above half-tank during fire season.";
+                
             } else if (message.includes('weather') || message.includes('conditions')) {
-                return `Current conditions show ${currentRiskScore}% risk level. Temperature: ${weatherData.temperature}°F, Humidity: ${weatherData.humidity}%, Wind: ${weatherData.windSpeed} mph. These conditions ${currentRiskScore > 70 ? 'create elevated fire risk' : 'are within normal parameters'}.`;
+                const riskFactors = analyzeRiskFactors();
+                const location = selectedZip ? `${selectedZip.name} (${selectedZip.zipCode})` : "Current location";
+                let analysis = `📊 ${location} CONDITIONS:\n• Risk Level: ${contextualData.risk}/100 `;
+                
+                if (contextualData.risk > 80) analysis += "(🔴 EXTREME)";
+                else if (contextualData.risk > 60) analysis += "(🟠 HIGH)"; 
+                else if (contextualData.risk > 40) analysis += "(🟡 MODERATE)";
+                else analysis += "(🟢 LOW)";
+                
+                analysis += `\n• Temperature: ${contextualData.temp}°F\n• Humidity: ${contextualData.humidity}%\n• Wind: ${contextualData.wind} mph`;
+                
+                if (riskFactors.length > 0) {
+                    analysis += `\n\n⚠️ KEY RISK FACTORS:\n• ${riskFactors.join('\n• ')}`;
+                }
+                
+                // Timeline prediction
+                if (contextualData.risk > 70) {
+                    analysis += `\n\n⏰ TIMELINE: Monitor conditions closely. Fire weather could persist 6-12 hours with current patterns.`;
+                }
+                
+                return analysis;
+                
             } else if (message.includes('alert') || message.includes('warning')) {
-                return "Stay updated with: Ventura County Alert system, CAL FIRE updates, local news, weather radio, and emergency apps. Sign up for local emergency notifications to receive immediate alerts.";
+                return "📱 STAY INFORMED:\n• Ventura County Alert (VC-Alert)\n• CAL FIRE incidents map\n• Weather.gov fire weather\n• Local news apps\n• NOAA weather radio\n\n🔔 Enable emergency alerts on all devices. Sign up for hyperlocal notifications.";
+                
             } else if (message.includes('kit') || message.includes('emergency')) {
-                return "Emergency kit essentials: Water (1 gallon per person per day), non-perishable food, first aid kit, flashlight, radio, batteries, medications, important documents, cash, and emergency contacts list.";
+                const timelinePressure = contextualData.risk > 70 ? "\n\n⏰ HIGH RISK DETECTED: Have your kit ready to grab in under 5 minutes." : "";
+                return "🎒 EMERGENCY GO-BAG ESSENTIALS:\n• Water (1 gal/person/day for 3 days)\n• Non-perishable food\n• First aid kit & medications\n• Flashlight, radio, batteries\n• Important documents (copies)\n• Cash, emergency contacts\n• N95 masks for smoke\n• Phone chargers" + timelinePressure;
+                
+            } else if (message.includes('zip') || message.includes('area') || message.includes('location')) {
+                if (selectedZip) {
+                    const riskFactors = analyzeRiskFactors();
+                    let analysis = `📍 ${selectedZip.name} (${selectedZip.zipCode}) ANALYSIS:\n• Current Risk: ${selectedZip.risk}/100 (${selectedZip.level})\n• Weather: ${selectedZip.temp}°F, ${selectedZip.humidity}% humidity, ${selectedZip.wind} mph wind`;
+                    
+                    if (riskFactors.length > 0) {
+                        analysis += `\n• Risk Factors: ${riskFactors.join(', ')}`;
+                    }
+                    
+                    // Specific recommendations based on risk level
+                    if (selectedZip.level === 'EXTREME') {
+                        analysis += `\n\n🚨 EXTREME RISK ACTIONS:\n• Prepare for potential evacuation\n• Monitor emergency channels\n• Have escape routes clear`;
+                    } else if (selectedZip.level === 'HIGH') {
+                        analysis += `\n\n⚠️ HIGH RISK ACTIONS:\n• Avoid outdoor burning\n• Be ready to evacuate quickly\n• Keep emergency kit accessible`;
+                    }
+                    
+                    return analysis;
+                } else {
+                    return "Click on a ZIP code above to get detailed risk analysis for that specific area. I can provide personalized recommendations based on local conditions.";
+                }
+                
             } else {
-                return "I'm here to help with wildfire safety questions. You can ask about current conditions, evacuation procedures, home protection, emergency kits, or fire prevention. What specific information do you need?";
+                const helpOptions = selectedZip ? `\n📍 Currently analyzing: ${selectedZip.name} (${selectedZip.zipCode})` : "\n📍 Click a ZIP code above for location-specific advice";
+                return "🔥 WILDFIRE AI ASSISTANT\nI provide intelligent risk analysis and safety guidance. Ask me about:" + helpOptions + 
+                       "\n\n• Current conditions & weather\n• Home protection strategies\n• Evacuation planning\n• Emergency preparedness\n• Location-specific risks\n\nWhat information do you need?";
             }
         }
 
